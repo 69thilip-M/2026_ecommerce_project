@@ -21,9 +21,9 @@ function ForgotPassword() {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-green-50">
+    <div className="flex items-center justify-center h-screen bg-orange-50">
       <div className="bg-white p-8 rounded-2xl shadow-md w-96">
-        <h2 className="text-2xl font-bold text-center text-green-700 mb-6">
+        <h2 className="text-2xl font-bold text-center text-orange-700 mb-6">
           Reset Password
         </h2>
         <form onSubmit={handleResetPassword}>
@@ -37,14 +37,14 @@ function ForgotPassword() {
           />
           <button
             type="submit"
-            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+            className="w-full bg-orange-600 text-white py-2 rounded hover:bg-orange-700"
           >
             Send Reset Email
           </button>
         </form>
 
         {message && (
-          <p className="mt-4 text-green-600 font-semibold text-center">
+          <p className="mt-4 text-orange-600 font-semibold text-center">
             {message}
           </p>
         )}

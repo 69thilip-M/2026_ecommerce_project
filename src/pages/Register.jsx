@@ -87,7 +87,7 @@ function Register() {
           />
           <button
             type="submit"
-            className="w-full rounded-lg bg-gradient-to-r from-lime-500 to-green-600 p-3 font-semibold text-white shadow-md hover:scale-105 transition-transform duration-300"
+            className="w-full rounded-lg bg-gradient-to-r from-lime-500 to-orange-600 p-3 font-semibold text-white shadow-md hover:scale-105 transition-transform duration-300"
           >
             Sign up
           </button>
@@ -124,12 +124,12 @@ function Register() {
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
           <div
             className={`p-6 rounded-xl shadow-xl text-center ${
-              popup.type === "success" ? "bg-green-100" : "bg-red-100"
+              popup.type === "success" ? "bg-orange-100" : "bg-red-100"
             }`}
           >
             <p
               className={`text-lg font-semibold ${
-                popup.type === "success" ? "text-green-700" : "text-red-700"
+                popup.type === "success" ? "text-orange-700" : "text-red-700"
               }`}
             >
               {popup.message}

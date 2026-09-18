@@ -33,12 +33,12 @@ function AddTestimonial() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-green-100 dark:bg-gray-900 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-orange-100 dark:bg-gray-900 px-4">
       <form
         onSubmit={handleSubmit}
         className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-md"
       >
-        <h2 className="text-2xl font-bold text-green-700 mb-6 text-center">
+        <h2 className="text-2xl font-bold text-orange-700 mb-6 text-center">
           Add Testimonial
         </h2>
 
@@ -50,7 +50,7 @@ function AddTestimonial() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg border border-green-400 dark:border-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-4 py-2 rounded-lg border border-orange-400 dark:border-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
             placeholder="Your name"
           />
         </div>
@@ -62,7 +62,7 @@ function AddTestimonial() {
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg border border-green-400 dark:border-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-4 py-2 rounded-lg border border-orange-400 dark:border-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
             placeholder="Your comment"
             rows={4}
           />
@@ -70,7 +70,7 @@ function AddTestimonial() {
 
         <button
           type="submit"
-          className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition"
+          className="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition"
         >
           Submit
         </button>

@@ -35,7 +35,7 @@ function BlogDetails() {
         </div>
 
         {/* Blog Title */}
-        <h1 className="text-4xl font-bold text-green-700 dark:text-green-400 mb-6">
+        <h1 className="text-4xl font-bold text-orange-700 dark:text-orange-400 mb-6">
           {blog.title}
         </h1>
 

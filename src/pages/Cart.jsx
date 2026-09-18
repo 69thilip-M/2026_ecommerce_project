@@ -156,7 +156,7 @@ function Cart() {
   };
 
   return (
-    <div className="min-h-screen bg-green-100 dark:bg-gray-900 flex flex-col text-gray-900 dark:text-gray-100 relative">
+    <div className="min-h-screen bg-orange-100 dark:bg-gray-900 flex flex-col text-gray-900 dark:text-gray-100 relative">
       <Navbar />
 
       {/* Cart Section */}
@@ -235,7 +235,7 @@ function Cart() {
                             </button>
                           </div>
                         </td>
-                        <td className="p-4 text-center text-green-600 dark:text-green-400 font-medium">
+                        <td className="p-4 text-center text-orange-600 dark:text-orange-400 font-medium">
                           ₹{item.price}
                         </td>
                         <td className="p-4 text-center font-semibold">
@@ -259,7 +259,7 @@ function Cart() {
               <div className="flex justify-between items-center mt-6">
                 <p className="text-lg font-semibold">
                   Total:{" "}
-                  <span className="text-green-600 dark:text-green-400">
+                  <span className="text-orange-600 dark:text-orange-400">
                     ₹{totalAmount}
                   </span>
                 </p>
@@ -361,7 +361,7 @@ function Cart() {
                 </button>
                 <button
                   onClick={validateAndSubmit}
-                  className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg"
+                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg"
                 >
                   Place Order
                 </button>
@@ -376,7 +376,7 @@ function Cart() {
         {showSuccess && (
           <motion.div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <motion.div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg max-w-sm w-full text-center">
-              <h2 className="text-xl font-semibold mb-4 text-green-600">
+              <h2 className="text-xl font-semibold mb-4 text-orange-600">
                 ✅ Order Placed!
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-6">

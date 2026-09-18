@@ -2,8 +2,8 @@
 // src/pages/About.jsx
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import Contact from "./Contact";
 import { motion } from "framer-motion";
+import bannerHome from "../assets/images/banner-home.jpg";
 
 function About() {
   const fadeInUp = {
@@ -21,15 +21,42 @@ function About() {
   // };
 
   return (
-    <div className="min-h-screen bg-green-100 dark:bg-gray-900 flex flex-col transition-colors duration-300">
+    <div className="min-h-screen bg-orange-100 dark:bg-gray-900 flex flex-col transition-colors duration-300">
       {/* Navbar */}
       <Navbar />
 
-      <div className="bg-green-100 dark:bg-gray-900 flex-grow transition-colors duration-300">
+      <section className="page-hero about-page-hero">
+        <div>
+          <span>ABOUT KMR FRESH</span>
+          <h1>
+            Fresh shopping
+            <br />
+            from your
+            <br />
+            nearest store.
+          </h1>
+          <p>
+            KMR Fresh connects you with live inventory at your nearest store.
+            Fresh products are ready for collection or fast delivery straight
+            from our store.
+          </p>
+          <div className="page-hero-points">
+            <b>Fresh every day</b>
+            <b>From your nearest store</b>
+            <b>Fast &amp; reliable</b>
+          </div>
+        </div>
+        <div className="page-hero-art">
+          <img src={bannerHome} alt="Fresh produce from KMR Fresh" />
+          <strong>Active store</strong>
+        </div>
+      </section>
+
+      <div className="bg-orange-100 dark:bg-gray-900 flex-grow transition-colors duration-300">
         <div className="p-6 max-w-5xl mx-auto">
           {/* Page Title */}
           <motion.h1
-            className="text-4xl font-bold text-center text-green-700 dark:text-green-400 mb-6"
+            className="text-4xl font-bold text-center text-orange-700 dark:text-orange-400 mb-6"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
@@ -49,7 +76,7 @@ function About() {
             {/* About Description */}
             <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
               Welcome to{" "}
-              <span className="font-semibold text-green-700 dark:text-green-400">
+              <span className="font-semibold text-orange-700 dark:text-orange-400">
                 FreshMart
               </span>{" "}
               – your one-stop shop for fresh vegetables, fruits, and organic
@@ -68,8 +95,8 @@ function About() {
             {/* Vision & Mission Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
               {/* Vision */}
-              <div className="bg-green-50 dark:bg-gray-700 p-6 rounded-xl shadow hover:shadow-lg transition">
-                <h3 className="text-xl font-bold text-green-700 dark:text-green-300 mb-2">
+              <div className="bg-orange-50 dark:bg-gray-700 p-6 rounded-xl shadow hover:shadow-lg transition">
+                <h3 className="text-xl font-bold text-orange-700 dark:text-orange-300 mb-2">
                   Our Vision
                 </h3>
                 <p className="text-gray-700 dark:text-gray-200 leading-relaxed">
@@ -80,8 +107,8 @@ function About() {
               </div>
 
               {/* Mission */}
-              <div className="bg-green-50 dark:bg-gray-700 p-6 rounded-xl shadow hover:shadow-lg transition">
-                <h3 className="text-xl font-bold text-green-700 dark:text-green-300 mb-2">
+              <div className="bg-orange-50 dark:bg-gray-700 p-6 rounded-xl shadow hover:shadow-lg transition">
+                <h3 className="text-xl font-bold text-orange-700 dark:text-orange-300 mb-2">
                   Our Mission
                 </h3>
                 <p className="text-gray-700 dark:text-gray-200 leading-relaxed">
@@ -101,7 +128,7 @@ function About() {
             viewport={{ once: true, amount: 0.3 }}
             variants={fadeInUp}
           >
-            <h2 className="text-2xl font-semibold text-green-700 dark:text-green-400 mb-4">
+            <h2 className="text-2xl font-semibold text-orange-700 dark:text-orange-400 mb-4">
               Our Team
             </h2>
             <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -112,7 +139,7 @@ function About() {
               ].map((member, i) => (
                 <motion.li
                   key={i}
-                  className="bg-green-50 dark:bg-gray-700 p-4 rounded-xl shadow"
+                  className="bg-orange-50 dark:bg-gray-700 p-4 rounded-xl shadow"
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.3 }}
@@ -129,16 +156,6 @@ function About() {
             </ul>
           </motion.div>
 
-          {/* Contact Us Form */}
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={fadeInUp}
-          >
-            <Contact />
-          </motion.div>
-
           {/* Static Google Map */}
           <motion.div
             className="mb-8 mt-8"
@@ -147,7 +164,7 @@ function About() {
             viewport={{ once: true, amount: 0.3 }}
             variants={fadeInUp}
           >
-            <h2 className="text-2xl font-semibold text-green-700 dark:text-green-400 mb-4">
+            <h2 className="text-2xl font-semibold text-orange-700 dark:text-orange-400 mb-4">
               Our Location
             </h2>
             <div className="rounded-xl overflow-hidden shadow-lg">

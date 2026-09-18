@@ -12,6 +12,7 @@ import ForgotPassword from "./pages/ForgetPassword";
 import AddTestimonial from "./components/AddTestimonial";
 import Blog from "./pages/Blog";
 import BlogDetail from "./pages/BlogDetails";
+import Contact from "./pages/Contact";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/products" element={<Products />} />
         <Route path="/about" element={<About />}></Route>
+        <Route path="/contact" element={<Contact />}></Route>
         <Route path="/cart" element={<Cart />}></Route>
         <Route path="/add-product" element={<AddProduct />} />
         <Route path="/profile" element={<Profile />} />

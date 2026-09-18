@@ -68,14 +68,14 @@ function EditProduct() {
   }
 
   return (
-    <div className="min-h-screen bg-green-100 dark:bg-gray-900 flex flex-col">
+    <div className="min-h-screen bg-orange-100 dark:bg-gray-900 flex flex-col">
       <Navbar />
 
       <div className="flex-grow flex justify-center items-center p-6">
         <div className="w-full max-w-lg bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
           {/* ✅ Header with title + Back button */}
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-green-700 dark:text-green-400">
+            <h2 className="text-2xl font-bold text-orange-700 dark:text-orange-400">
               Edit Product ✏️
             </h2>
             <button
@@ -98,7 +98,7 @@ function EditProduct() {
                 value={product.name}
                 onChange={handleChange}
                 placeholder="Product Name"
-                className="w-full px-4 py-2 rounded-lg border border-green-400 bg-white dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2 rounded-lg border border-orange-400 bg-white dark:bg-gray-700 dark:text-white"
                 required
               />
             </div>
@@ -113,7 +113,7 @@ function EditProduct() {
                 value={product.description}
                 onChange={handleChange}
                 placeholder="Description"
-                className="w-full px-4 py-2 rounded-lg border border-green-400 bg-white dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2 rounded-lg border border-orange-400 bg-white dark:bg-gray-700 dark:text-white"
               />
             </div>
 
@@ -128,7 +128,7 @@ function EditProduct() {
                 value={product.price}
                 onChange={handleChange}
                 placeholder="Price"
-                className="w-full px-4 py-2 rounded-lg border border-green-400 bg-white dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2 rounded-lg border border-orange-400 bg-white dark:bg-gray-700 dark:text-white"
                 required
               />
             </div>
@@ -144,7 +144,7 @@ function EditProduct() {
                 value={product.category}
                 onChange={handleChange}
                 placeholder="Category"
-                className="w-full px-4 py-2 rounded-lg border border-green-400 bg-white dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2 rounded-lg border border-orange-400 bg-white dark:bg-gray-700 dark:text-white"
               />
             </div>
 
@@ -159,14 +159,14 @@ function EditProduct() {
                 value={product.image}
                 onChange={handleChange}
                 placeholder="Image URL"
-                className="w-full px-4 py-2 rounded-lg border border-green-400 bg-white dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2 rounded-lg border border-orange-400 bg-white dark:bg-gray-700 dark:text-white"
               />
             </div>
 
             {/* Save Button */}
             <button
               type="submit"
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium shadow-md transition"
+              className="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 rounded-lg font-medium shadow-md transition"
             >
               Save Changes
             </button>

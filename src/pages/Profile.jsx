@@ -91,7 +91,7 @@ function Profile() {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center h-screen bg-green-50 dark:bg-gray-900">
+      <div className="flex items-center justify-center h-screen bg-orange-50 dark:bg-gray-900">
         <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
           Please log in to view profile.
         </p>
@@ -100,7 +100,7 @@ function Profile() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-green-50 dark:bg-gray-900 dark:text-white">
+    <div className="min-h-screen flex flex-col bg-orange-50 dark:bg-gray-900 dark:text-white">
       <Navbar />
 
       <div className="flex-grow p-6 flex flex-col items-center space-y-8">
@@ -117,7 +117,7 @@ function Profile() {
                   "https://dummyimage.com/150x150/cccccc/000000&text=Profile"
                 }
                 alt="Profile"
-                className={`w-36 h-36 rounded-full border-4 border-green-600 object-cover shadow-lg ${
+                className={`w-36 h-36 rounded-full border-4 border-orange-600 object-cover shadow-lg ${
                   uploading ? "opacity-50" : "opacity-100"
                 }`}
               />
@@ -142,7 +142,7 @@ function Profile() {
             <p className="text-gray-600 dark:text-gray-300 mt-1">{user.email}</p>
           </div>
 
-          <div className="mt-6 bg-green-50 dark:bg-gray-700 rounded-xl p-5 shadow-inner">
+          <div className="mt-6 bg-orange-50 dark:bg-gray-700 rounded-xl p-5 shadow-inner">
             <h3 className="text-xl font-semibold border-b pb-2 mb-4">
               Account Details
             </h3>
@@ -189,7 +189,7 @@ function Profile() {
                       Placed on {new Date(order.placedAt).toLocaleString()}
                     </p>
                   </div>
-                  <p className="text-xl font-semibold text-green-600 dark:text-green-400">
+                  <p className="text-xl font-semibold text-orange-600 dark:text-orange-400">
                     ₹{order.total}
                   </p>
                 </div>
@@ -212,7 +212,7 @@ function Profile() {
                         <p className="text-gray-600 dark:text-gray-300">
                           Qty: {item.quantity || 1}
                         </p>
-                        <p className="font-medium text-green-600 dark:text-green-400">
+                        <p className="font-medium text-orange-600 dark:text-orange-400">
                           ₹{item.price * (item.quantity || 1)}
                         </p>
                       </div>

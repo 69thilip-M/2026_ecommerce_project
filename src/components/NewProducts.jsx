@@ -29,8 +29,8 @@ function NewProducts() {
   }, []);
 
   return (
-    <section className="px-6 bg-green-100 dark:bg-gray-900 dark:text-white">
-      <h2 className="text-3xl font-bold text-green-700 dark:text-green-400 mb-6 ">
+    <section className="px-6 bg-orange-100 dark:bg-gray-900 dark:text-white">
+      <h2 className="text-3xl font-bold text-orange-700 dark:text-orange-400 mb-6 ">
         New Products
       </h2>
 
@@ -56,7 +56,7 @@ function NewProducts() {
                   className="w-full h-48 object-cover"
                 />
                 {product.category && (
-                  <span className="absolute top-2 right-2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                  <span className="absolute top-2 right-2 bg-orange-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
                     {product.category}
                   </span>
                 )}
@@ -77,7 +77,7 @@ function NewProducts() {
                 )}
 
                 {/* Price */}
-                <p className="text-green-700 dark:text-green-400 font-semibold text-xl mb-3">
+                <p className="text-orange-700 dark:text-orange-400 font-semibold text-xl mb-3">
                   ₹{product.price}{" "}
                   <span className="text-sm text-gray-500 dark:text-gray-400">
                     / 1kg
@@ -95,7 +95,7 @@ function NewProducts() {
                 ) : (
                   <button
                     onClick={() => addToCart(product)}
-                    className="w-full mt-auto flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition"
+                    className="w-full mt-auto flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium transition"
                   >
                     <FaCartPlus className="text-lg" /> Add to Cart
                   </button>

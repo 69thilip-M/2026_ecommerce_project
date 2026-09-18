@@ -84,13 +84,13 @@ function AppProduct() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-green-50 dark:bg-gray-900 transition-colors">
+    <div className="flex flex-col min-h-screen bg-orange-50 dark:bg-gray-900 transition-colors">
       <Navbar />
 
       <div className="flex-grow flex items-center justify-center px-4">
         <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-lg transition-colors">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-green-700 dark:text-green-400">
+            <h1 className="text-2xl font-bold text-orange-700 dark:text-orange-400">
               Add New Product 🥦🍎
             </h1>
             {/* ✅ Back Button */}
@@ -113,7 +113,7 @@ function AppProduct() {
                 placeholder="Enter product name"
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 required
               />
             </div>
@@ -126,7 +126,7 @@ function AppProduct() {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
               >
                 <option value="fruits">Fruits</option>
                 <option value="vegetables">Vegetables</option>
@@ -145,7 +145,7 @@ function AppProduct() {
                   type="number"
                   value={price}
                   onChange={(e) => setPrice(Number(e.target.value))}
-                  className="w-24 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  className="w-24 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                   required
                 />
                 <input
@@ -155,7 +155,7 @@ function AppProduct() {
                   step="10"
                   value={price}
                   onChange={(e) => setPrice(Number(e.target.value))}
-                  className="flex-1 accent-green-600"
+                  className="flex-1 accent-orange-600"
                 />
               </div>
             </div>
@@ -170,7 +170,7 @@ function AppProduct() {
                 rows="3"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 required
               ></textarea>
             </div>
@@ -185,7 +185,7 @@ function AppProduct() {
                 placeholder="Enter available stock"
                 value={stock}
                 onChange={(e) => setStock(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
                 required
               />
             </div>
@@ -199,7 +199,7 @@ function AppProduct() {
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
               />
               {imageUrl && (
                 <div className="mt-4">
@@ -219,7 +219,7 @@ function AppProduct() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition"
+              className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 rounded-lg transition"
             >
               {loading ? "Uploading..." : "Add Product"}
             </button>

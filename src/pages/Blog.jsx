@@ -29,7 +29,7 @@ function Blog() {
           / Blogs
         </div>
 
-        <h1 className="text-4xl font-bold text-green-700 dark:text-green-400 mb-10">
+        <h1 className="text-4xl font-bold text-orange-700 dark:text-orange-400 mb-10">
           Blogs
         </h1>
 
@@ -57,7 +57,7 @@ function Blog() {
                 </p>
                 <Link
                   to={`/blog/${blog.id}`}
-                  className="text-green-600 dark:text-green-400 font-medium hover:underline"
+                  className="text-orange-600 dark:text-orange-400 font-medium hover:underline"
                 >
                   Read More →
                 </Link>
@@ -74,7 +74,7 @@ function Blog() {
               onClick={() => setCurrentPage(i + 1)}
               className={`px-4 py-2 rounded-lg ${
                 currentPage === i + 1
-                  ? "bg-green-600 text-white"
+                  ? "bg-orange-600 text-white"
                   : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
               }`}
             >

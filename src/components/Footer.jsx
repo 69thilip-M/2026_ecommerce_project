@@ -10,7 +10,7 @@ function Footer() {
       className={`w-full py-10 transition-colors duration-300 ${
         theme === "dark"
           ? "bg-gray-900 text-gray-200"
-          : "bg-green-600 text-white"
+          : "bg-orange-600 text-white"
       }`}
     >
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 px-6">

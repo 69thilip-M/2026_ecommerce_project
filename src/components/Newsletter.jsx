@@ -14,7 +14,7 @@ function Newsletter() {
   };
 
   return (
-    <div className="bg-gradient-to-r from-green-600 via-green-500 to-green-700 py-16 px-6 text-center text-white">
+    <div className="bg-gradient-to-r from-orange-600 via-orange-500 to-orange-700 py-16 px-6 text-center text-white">
       {/* Title */}
       <h2 className="text-3xl md:text-4xl font-bold mb-4 animate-bounce">
         📩 Subscribe & Get Exclusive Deals
@@ -34,11 +34,11 @@ function Newsletter() {
           placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="px-4 py-3 rounded-lg text-gray-800 w-72 shadow-md focus:outline-none focus:ring-4 focus:ring-green-300 transition"
+          className="px-4 py-3 rounded-lg text-gray-800 w-72 shadow-md focus:outline-none focus:ring-4 focus:ring-orange-300 transition"
         />
         <button
           type="submit"
-          className="px-6 py-3 bg-white text-green-700 rounded-lg font-semibold shadow-lg hover:scale-105 hover:bg-green-100 transition duration-300"
+          className="px-6 py-3 bg-white text-orange-700 rounded-lg font-semibold shadow-lg hover:scale-105 hover:bg-orange-100 transition duration-300"
         >
           Subscribe 🚀
         </button>

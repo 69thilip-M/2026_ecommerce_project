@@ -99,12 +99,12 @@ function Products() {
   };
 
   return (
-    <div className="min-h-screen bg-green-100 dark:bg-gray-900 flex flex-col">
+    <div className="min-h-screen bg-orange-100 dark:bg-gray-900 flex flex-col">
       <Navbar />
       <div className="p-6 flex-grow">
         {/* Header */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-green-700 dark:text-green-400 text-center md:text-left">
+          <h1 className="text-3xl font-bold text-orange-700 dark:text-orange-400 text-center md:text-left">
             Our Products
           </h1>
           {user?.email === "admin123@gmail.com" && (
@@ -112,7 +112,7 @@ function Products() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate("/add-product")}
-              className="mt-4 md:mt-0 flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg"
+              className="mt-4 md:mt-0 flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-5 py-2 rounded-lg"
             >
               <FaPlus /> Add Product
             </motion.button>
@@ -132,8 +132,8 @@ function Products() {
                 }}
                 className={`px-4 py-2 rounded-full font-medium transition ${
                   category.toLowerCase() === cat.toLowerCase()
-                    ? "bg-green-600 text-white shadow-md"
-                    : "bg-white dark:bg-gray-800 text-green-700 dark:text-green-300 border border-green-600 hover:bg-green-50 dark:hover:bg-gray-700"
+                    ? "bg-orange-600 text-white shadow-md"
+                    : "bg-white dark:bg-gray-800 text-orange-700 dark:text-orange-300 border border-orange-600 hover:bg-orange-50 dark:hover:bg-gray-700"
                 }`}
               >
                 {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -149,7 +149,7 @@ function Products() {
               setSearchTerm(e.target.value);
               setCurrentPage(1); // reset to page 1 on search
             }}
-            className="w-full md:w-64 px-4 py-2 rounded-lg border border-green-400 dark:border-green-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full md:w-64 px-4 py-2 rounded-lg border border-orange-400 dark:border-orange-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
         </div>
 
@@ -181,7 +181,7 @@ function Products() {
                         className="w-full h-48 object-cover"
                       />
                       {product.category && (
-                        <span className="absolute top-2 right-2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                        <span className="absolute top-2 right-2 bg-orange-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
                           {product.category}
                         </span>
                       )}
@@ -198,7 +198,7 @@ function Products() {
                         </p>
                       )}
 
-                      <p className="text-green-700 dark:text-green-400 font-semibold text-xl mb-3">
+                      <p className="text-orange-700 dark:text-orange-400 font-semibold text-xl mb-3">
                         ₹{product.price}{" "}
                         <span className="text-sm text-gray-500 dark:text-gray-400">
                           / 1kg
@@ -236,7 +236,7 @@ function Products() {
                         <motion.button
                           whileTap={{ scale: 0.95 }}
                           onClick={() => addToCart(product)}
-                          className="w-full mt-auto flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition"
+                          className="w-full mt-auto flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium transition"
                         >
                           <FaCartPlus /> Add to Cart
                         </motion.button>
@@ -255,7 +255,7 @@ function Products() {
                 className={`px-4 py-2 rounded-lg ${
                   currentPage === 1
                     ? "bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed"
-                    : "bg-green-600 hover:bg-green-700 text-white"
+                    : "bg-orange-600 hover:bg-orange-700 text-white"
                 }`}
               >
                 Previous
@@ -271,7 +271,7 @@ function Products() {
                 className={`px-4 py-2 rounded-lg ${
                   currentPage === totalPages
                     ? "bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed"
-                    : "bg-green-600 hover:bg-green-700 text-white"
+                    : "bg-orange-600 hover:bg-orange-700 text-white"
                 }`}
               >
                 Next

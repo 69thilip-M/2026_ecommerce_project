@@ -82,7 +82,7 @@ function Login() {
           />
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-lime-500 to-green-600 text-white py-3 rounded-lg font-semibold shadow-md hover:scale-105 transition-transform duration-300"
+            className="w-full bg-gradient-to-r from-lime-500 to-orange-600 text-white py-3 rounded-lg font-semibold shadow-md hover:scale-105 transition-transform duration-300"
           >
             Login
           </button>
@@ -121,7 +121,7 @@ function Login() {
             <h3 className="text-red-600 font-bold text-lg mb-3">Error</h3>
             <p className="text-gray-700 mb-4">{error}</p>
             <button
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700"
               onClick={() => setError("")}
             >
               Close
