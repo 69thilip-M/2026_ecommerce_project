@@ -167,10 +167,18 @@ function Home() {
                 </span>
               </div>
 
-              <img
-                src={bannerHome}
-                alt="A colourful selection of fresh fruit and vegetables"
-              />
+              {/* Photo fitted inside an animated circle */}
+              <div className="hero-circle-wrap">
+                <span className="hero-halo" />
+                <span className="hero-ring" />
+
+                <div className="hero-circle">
+                  <img
+                    src={bannerHome}
+                    alt="A colourful selection of fresh fruit and vegetables"
+                  />
+                </div>
+              </div>
 
               <div className="delivery-note">
                 <LocalShippingOutlinedIcon />

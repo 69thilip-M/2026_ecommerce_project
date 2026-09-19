@@ -110,6 +110,31 @@
   }
 }
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes kenBurns {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.14);
+  }
+}
+
+@keyframes sheen {
+  0%,
+  55% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
 .marquee {
   display: inline-flex;
   animation: marquee 12s linear infinite;
@@ -505,24 +530,82 @@ body {
   place-items: center;
   padding: 52px 33px 30px;
 }
-.fresh-visual:before {
-  content: "";
+/* ---- Circular hero image ---- */
+.hero-circle-wrap {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 430px);
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+  animation:
+    heroIn 1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s backwards,
+    floatY 6s ease-in-out 1.2s infinite;
+}
+/* soft white halo behind the photo */
+.hero-halo {
   position: absolute;
-  width: 520px;
-  height: 520px;
+  inset: -34px;
   border-radius: 50%;
   background: #ffffffd9;
-  top: 72px;
-  left: 3%;
   animation: breathe 6s ease-in-out infinite;
 }
-.fresh-visual img {
-  z-index: 1;
-  width: min(100%, 760px);
-  height: 430px;
-  object-fit: contain; /* works best with a transparent PNG */
-  border-radius: 28px;
-  filter: drop-shadow(0 26px 30px #2d6b4638);
+/* dashed ring that slowly turns, with a dot travelling around it */
+.hero-ring {
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  border: 2px dashed #9bd449;
+  animation: spin 26s linear infinite;
+}
+.hero-ring:before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 50%;
+  background: #9bdd45;
+  box-shadow: 0 0 0 5px #9bdd4535;
+}
+/* the circle that holds the photo */
+.hero-circle {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  isolation: isolate;
+  background: #f5c542;
+  border: 8px solid #ffffff;
+  box-shadow: 0 26px 50px #2d6b4640;
+}
+.hero-circle img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* which part of a wide photo stays visible inside the circle */
+  object-position: var(--hero-focus, 42% 50%);
+  transform-origin: 42% 50%;
+  animation: kenBurns 14s ease-in-out infinite alternate;
+}
+/* light sweep that glides across the photo */
+.hero-circle:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.28) 50%,
+    transparent 65%
+  );
+  transform: translateX(-120%);
+  animation: sheen 7s ease-in-out 2s infinite;
+  pointer-events: none;
 }
 .visual-note {
   position: absolute;
@@ -570,11 +653,6 @@ body {
   animation-delay: 0.52s;
 }
 
-.fresh-visual img {
-  animation:
-    heroIn 1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s backwards,
-    floatY 6s ease-in-out 1.2s infinite;
-}
 .visual-note {
   animation:
     fadeUp 0.7s ease 0.7s backwards,
@@ -1131,13 +1209,17 @@ body {
     min-height: 300px;
     padding: 35px 22px 25px;
   }
-  .fresh-visual:before {
-    width: 330px;
-    height: 330px;
-    top: 30px;
+  .fresh-visual {
+    min-height: 360px;
   }
-  .fresh-visual img {
-    height: 255px;
+  .hero-circle-wrap {
+    width: min(78vw, 270px);
+  }
+  .hero-halo {
+    inset: -22px;
+  }
+  .hero-ring {
+    inset: -10px;
   }
   .visual-note {
     top: 15px;
