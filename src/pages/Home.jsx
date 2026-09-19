@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
@@ -21,14 +23,83 @@ import HeadsetMicOutlinedIcon from "@mui/icons-material/HeadsetMicOutlined";
 function Home() {
   const navigate = useNavigate();
 
+  // Scroll reveal
+  useEffect(() => {
+    const items = document.querySelectorAll(".fresh-home .reveal");
+
+    if (!("IntersectionObserver" in window)) {
+      items.forEach((el) => el.classList.add("is-visible"));
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.15,
+        rootMargin: "0px 0px -40px 0px",
+      },
+    );
+
+    items.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Feature cards
+  const features = [
+    {
+      Icon: EnergySavingsLeafOutlinedIcon,
+      title: "Picked today",
+      text: "Quality checked by hand",
+    },
+    {
+      Icon: LocalShippingOutlinedIcon,
+      title: "Fast local delivery",
+      text: "From your nearest KMR store",
+    },
+    {
+      Icon: VerifiedUserOutlinedIcon,
+      title: "Easy, secure payments",
+      text: "Shop with confidence",
+    },
+  ];
+
+  // How it works
+  const howItWorks = [
+    {
+      title: "Choose your location",
+      text: "We'll match you to your nearest KMR store.",
+    },
+    {
+      title: "Add to cart",
+      text: "Quick add, offers, and your order total are ready to review.",
+    },
+    {
+      title: "Check out securely",
+      text: "Address, delivery fee, and payment are handled end to end.",
+    },
+    {
+      title: "Track your order",
+      text: "Your invoice and order updates are available in your account.",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#fffaf5] text-[#5a2600] overflow-x-hidden">
+    <div className="fresh-home min-h-screen bg-[#f7fbf4] text-[#083f26] overflow-x-hidden">
       <Navbar />
 
       <main>
         {/* =========================
             HERO SECTION
         ========================== */}
+
         <section className="fresh-hero-wrap">
           <div className="fresh-hero">
             <div className="fresh-copy">
@@ -112,40 +183,32 @@ function Home() {
         {/* =========================
             FEATURE STRIP
         ========================== */}
+
         <section className="fresh-feature-strip">
-          <div>
-            <EnergySavingsLeafOutlinedIcon />
+          {features.map(({ Icon, title, text }, index) => (
+            <div
+              key={title}
+              className="reveal"
+              style={{
+                "--d": `${index * 0.12}s`,
+              }}
+            >
+              <Icon />
 
-            <span>
-              <b>Picked today</b>
-              <small>Quality checked by hand</small>
-            </span>
-          </div>
-
-          <div>
-            <LocalShippingOutlinedIcon />
-
-            <span>
-              <b>Fast local delivery</b>
-              <small>From your nearest KMR store</small>
-            </span>
-          </div>
-
-          <div>
-            <VerifiedUserOutlinedIcon />
-
-            <span>
-              <b>Easy, secure payments</b>
-              <small>Shop with confidence</small>
-            </span>
-          </div>
+              <span>
+                <b>{title}</b>
+                <small>{text}</small>
+              </span>
+            </div>
+          ))}
         </section>
 
         {/* =========================
             PRODUCTS SECTION
         ========================== */}
+
         <section className="fresh-products">
-          <div className="section-heading">
+          <div className="section-heading reveal">
             <div>
               <span>SHOP THE DAY'S BEST</span>
               <h2>Fresh picks for you</h2>
@@ -158,10 +221,13 @@ function Home() {
           </div>
 
           <div className="product-grid">
-            {productsData.slice(0, 4).map((product) => (
+            {productsData.slice(0, 4).map((product, index) => (
               <article
                 key={product.id}
-                className="fresh-product-card"
+                className="fresh-product-card reveal"
+                style={{
+                  "--d": `${index * 0.1}s`,
+                }}
                 onClick={() => navigate("/products")}
               >
                 <img src={product.image} alt={product.name} />
@@ -181,9 +247,11 @@ function Home() {
         {/* =========================
             STORE SECTIONS
         ========================== */}
+
         <section className="store-sections">
           {/* OFFER SECTION */}
-          <div className="delivery-offer">
+
+          <div className="delivery-offer reveal">
             <div className="offer-copy">
               <span>TODAY'S OFFER</span>
 
@@ -230,26 +298,16 @@ function Home() {
           </div>
 
           {/* HOW IT WORKS */}
+
           <div className="how-it-works">
-            {[
-              [
-                "Choose your location",
-                "We'll match you to your nearest KMR store.",
-              ],
-              [
-                "Add to cart",
-                "Quick add, offers, and your order total are ready to review.",
-              ],
-              [
-                "Check out securely",
-                "Address, delivery fee, and payment are handled end to end.",
-              ],
-              [
-                "Track your order",
-                "Your invoice and order updates are available in your account.",
-              ],
-            ].map(([title, text], index) => (
-              <article key={title}>
+            {howItWorks.map(({ title, text }, index) => (
+              <article
+                key={title}
+                className="reveal"
+                style={{
+                  "--d": `${index * 0.1}s`,
+                }}
+              >
                 <b>{index + 1}</b>
 
                 <h3>{title}</h3>
@@ -260,7 +318,8 @@ function Home() {
           </div>
 
           {/* VOUCHER CALLOUT */}
-          <div className="voucher-callout">
+
+          <div className="voucher-callout reveal">
             <div>
               <span>KMR FRESH ONLINE</span>
 
@@ -279,7 +338,8 @@ function Home() {
           </div>
 
           {/* SERVICE ROW */}
-          <div className="service-row">
+
+          <div className="service-row reveal">
             <div>
               <VerifiedUserOutlinedIcon />
 
@@ -321,17 +381,24 @@ function Home() {
         {/* =========================
             NEWSLETTER
         ========================== */}
-        <Newsletter />
+
+        <div className="reveal">
+          <Newsletter />
+        </div>
 
         {/* =========================
             TESTIMONIALS
         ========================== */}
-        <Testimonials />
+
+        <div className="reveal">
+          <Testimonials />
+        </div>
       </main>
 
       {/* =========================
           FOOTER
       ========================== */}
+
       <Footer />
     </div>
   );
