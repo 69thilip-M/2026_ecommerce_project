@@ -1,7 +1,11 @@
 import { NavLink, useNavigate } from "react-router-dom";
+
 import { useEffect, useRef, useState } from "react";
+
 import { getAuth, signOut } from "firebase/auth";
+
 import { useCart } from "../context/CartContext";
+
 import { useTheme } from "../context/ThemeContext";
 
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
@@ -13,19 +17,31 @@ import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined
 
 function Navbar() {
   const navigate = useNavigate();
+
   const { cart, user } = useCart();
+
   const { theme, toggleTheme } = useTheme();
 
   const [menuOpen, setMenuOpen] = useState(false);
+
   const [profileOpen, setProfileOpen] = useState(false);
+
   const [query, setQuery] = useState("");
 
   const profileRef = useRef(null);
+
+  // =========================
+  // CART ITEM COUNT
+  // =========================
 
   const totalItems = cart.reduce(
     (total, item) => total + (item.quantity || 1),
     0,
   );
+
+  // =========================
+  // NAVIGATION LINKS
+  // =========================
 
   const links = [
     ["Home", "/home"],
@@ -34,6 +50,10 @@ function Navbar() {
     ["Contact", "/contact"],
     ["Blog", "/blog"],
   ];
+
+  // =========================
+  // CLOSE PROFILE DROPDOWN
+  // =========================
 
   useEffect(() => {
     const close = (event) => {
@@ -44,27 +64,47 @@ function Navbar() {
 
     document.addEventListener("mousedown", close);
 
-    return () => document.removeEventListener("mousedown", close);
+    return () => {
+      document.removeEventListener("mousedown", close);
+    };
   }, []);
+
+  // =========================
+  // SEARCH
+  // =========================
 
   const submitSearch = (event) => {
     event.preventDefault();
 
     navigate("/products", {
-      state: { search: query },
+      state: {
+        search: query,
+      },
     });
   };
 
-  const logout = async () => {
-    await signOut(getAuth());
+  // =========================
+  // LOGOUT
+  // =========================
 
-    setProfileOpen(false);
-    navigate("/");
+  const logout = async () => {
+    try {
+      await signOut(getAuth());
+
+      setProfileOpen(false);
+
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
     <header className="fresh-header">
-      {/* Offer Bar */}
+      {/* =========================
+          OFFER BAR
+      ========================= */}
+
       <div className="fresh-offer">
         <span className="offer-pill">Fresh morning sale</span>
 
@@ -75,14 +115,19 @@ function Navbar() {
         </button>
       </div>
 
-      {/* Main Navbar */}
+      {/* =========================
+          MAIN NAVBAR
+      ========================= */}
+
       <div className="fresh-mainbar">
-        {/* Logo */}
+        {/* LOGO */}
+
         <NavLink to="/home" className="fresh-brand">
           KMR <span>FRESH</span>
         </NavLink>
 
-        {/* Search */}
+        {/* SEARCH */}
+
         <form className="fresh-search" onSubmit={submitSearch}>
           <SearchRoundedIcon fontSize="small" />
 
@@ -95,15 +140,18 @@ function Navbar() {
           <button type="submit">Search</button>
         </form>
 
-        {/* Actions */}
+        {/* ACTIONS */}
+
         <div className="fresh-actions">
-          {/* Location */}
+          {/* LOCATION */}
+
           <button className="location-button" type="button">
             <LocationOnOutlinedIcon fontSize="small" />
             KMR Store
           </button>
 
-          {/* Login */}
+          {/* LOGIN */}
+
           {!user && (
             <button
               className="login-button"
@@ -114,17 +162,26 @@ function Navbar() {
             </button>
           )}
 
-          {/* Cart */}
+          {/* =========================
+              CART
+          ========================= */}
+
           <button
             className="cart-button"
             type="button"
             onClick={() => navigate("/cart")}
           >
             <ShoppingCartOutlinedIcon fontSize="small" />
-            Cart <b>{totalItems}</b>
+
+            <span>Cart</span>
+
+            <b>{totalItems}</b>
           </button>
 
-          {/* Profile */}
+          {/* =========================
+              PROFILE
+          ========================= */}
+
           {user && (
             <div className="profile-menu" ref={profileRef}>
               <button
@@ -140,7 +197,8 @@ function Navbar() {
                 )}
               </button>
 
-              {/* Profile Dropdown */}
+              {/* PROFILE DROPDOWN */}
+
               {profileOpen && (
                 <div className="profile-dropdown">
                   <button
@@ -170,7 +228,8 @@ function Navbar() {
           )}
         </div>
 
-        {/* Mobile Menu */}
+        {/* MOBILE MENU */}
+
         <button
           className="fresh-menu"
           aria-label="Toggle navigation"
@@ -180,7 +239,10 @@ function Navbar() {
         </button>
       </div>
 
-      {/* Navigation */}
+      {/* =========================
+          NAVIGATION
+      ========================= */}
+
       <nav className={`fresh-nav ${menuOpen ? "is-open" : ""}`}>
         {links.map(([label, path]) => (
           <NavLink key={path} to={path} onClick={() => setMenuOpen(false)}>
