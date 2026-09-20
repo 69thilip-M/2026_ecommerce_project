@@ -16,7 +16,7 @@ import Contact from "./pages/Contact";
 
 function App() {
   return (
-    <BrowserRouter basename="/kmrvegetables">
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       {" "}
       {/* ✅ use your repo name here */}
       <Routes>
