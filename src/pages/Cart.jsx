@@ -1,12 +1,12 @@
 // src/pages/Cart.jsx
 
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-import DeliveryDetailsModal from "../components/DeliveryDetailsModal";
-import PaymentModal from "../components/PaymentModal";
+import CheckoutStepper from "../components/CheckoutStepper";
 
 import { useCart } from "../context/CartContext";
 
@@ -16,67 +16,76 @@ import { doc, getDoc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 
-// =========================================================
-// WEIGHT OPTIONS
-// =========================================================
+import {
+  FaTrash,
+  FaPlus,
+  FaMinus,
+  FaCheck,
+  FaLeaf,
+  FaLock,
+  FaTruck,
+  FaHeart,
+  FaShoppingBasket,
+  FaShoppingCart,
+  FaWhatsapp,
+  FaArrowRight,
+  FaArrowLeft,
+} from "react-icons/fa";
 
-const WEIGHT_OPTIONS = [
-  {
-    value: 0.25,
-    label: "250 g",
-  },
-  {
-    value: 0.5,
-    label: "500 g",
-  },
-  {
-    value: 0.75,
-    label: "750 g",
-  },
-  {
-    value: 1,
-    label: "1 KG",
-  },
-  {
-    value: 1.5,
-    label: "1.5 KG",
-  },
-  {
-    value: 2,
-    label: "2 KG",
-  },
-  {
-    value: 2.5,
-    label: "2.5 KG",
-  },
-  {
-    value: 3,
-    label: "3 KG",
-  },
-];
+import {
+  WEIGHT_OPTIONS,
+  formatWeight,
+  formatPrice,
+  loadWeights,
+  saveWeight,
+  removeWeight,
+  clearWeights,
+  useWishlist,
+} from "../utils/shop";
+
+// Orders above this amount get free delivery (same offer as the home page)
+const FREE_DELIVERY_MIN = 1000;
+
+const getItemImage = (item) => item.image || item.imageUrl || item.img || "";
 
 // =========================================================
-// FORMAT WEIGHT
+// PRODUCT THUMBNAIL (with fallback)
 // =========================================================
 
-const formatWeight = (weight) => {
-  if (weight < 1) {
-    return `${weight * 1000} g`;
+function Thumb({ src, alt, className = "" }) {
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
+  if (!src || failed) {
+    return (
+      <div
+        className={`grid place-items-center bg-gradient-to-br from-[#eaf5e5] to-[#d6ecce] text-[#158447] ${className}`}
+      >
+        <FaLeaf className="text-xl opacity-70" />
+      </div>
+    );
   }
 
-  return `${weight} KG`;
-};
-
-// =========================================================
-// FORMAT PRICE
-// =========================================================
-
-const formatPrice = (price) => {
-  return Number(price || 0).toLocaleString("en-IN");
-};
+  return (
+    <img
+      src={src}
+      alt={alt}
+      onError={() => setFailed(true)}
+      className={`object-cover ${className}`}
+    />
+  );
+}
 
 function Cart() {
-  const { cart, removeFromCart, updateQuantity, clearCart, user } = useCart();
+  const navigate = useNavigate();
+
+  const { cart, addToCart, removeFromCart, updateQuantity, clearCart, user } =
+    useCart();
+
+  const wishlist = useWishlist();
 
   // =========================================================
   // MODAL STATES
@@ -89,27 +98,22 @@ function Cart() {
   const [pendingOrder, setPendingOrder] = useState(null);
 
   // =========================================================
-  // CHECKOUT FLOW
-  // =========================================================
-
-  const [showDetails, setShowDetails] = useState(false);
-  const [showPayment, setShowPayment] = useState(false);
-
-  const [deliveryDetails, setDeliveryDetails] = useState(null);
-  const [checkout, setCheckout] = useState(null);
-
-  // =========================================================
   // WEIGHT STATE
   //
-  // Each cart item gets its own weight.
+  // Each cart item has its own weight.
+  // The weight chosen on the Products page is remembered in
+  // localStorage, so it is picked up here automatically.
   // Default = 1 KG
   // =========================================================
 
   const [itemWeights, setItemWeights] = useState(() => {
+    const saved = loadWeights();
+
     const initialWeights = {};
 
     cart.forEach((item) => {
-      initialWeights[item.id] = item.weight || 1;
+      initialWeights[item.id] =
+        Number(saved[String(item.id)]) || Number(item.weight) || 1;
     });
 
     return initialWeights;
@@ -121,11 +125,14 @@ function Cart() {
 
   useEffect(() => {
     setItemWeights((previous) => {
+      const saved = loadWeights();
+
       const updated = { ...previous };
 
       cart.forEach((item) => {
         if (!updated[item.id]) {
-          updated[item.id] = item.weight || 1;
+          updated[item.id] =
+            Number(saved[String(item.id)]) || Number(item.weight) || 1;
         }
       });
 
@@ -138,10 +145,14 @@ function Cart() {
   // =========================================================
 
   const updateWeight = (itemId, weight) => {
+    const value = Number(weight);
+
     setItemWeights((previous) => ({
       ...previous,
-      [itemId]: Number(weight),
+      [itemId]: value,
     }));
+
+    saveWeight(itemId, value);
   };
 
   // =========================================================
@@ -187,22 +198,24 @@ function Cart() {
 
   const itemCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
 
+  // free delivery progress
+  const remainingForFree = Math.max(FREE_DELIVERY_MIN - totalAmount, 0);
+
+  const freeProgress = Math.min(totalAmount / FREE_DELIVERY_MIN, 1) * 100;
+
   // =========================================================
   // LOCK BACKGROUND SCROLL
   //
   // This works for:
-  // Delivery popup
-  // Payment popup
   // WhatsApp address popup
   // Success popup
   // =========================================================
 
-  const modalOpen =
-    showDetails || showPayment || showAddressForm || showSuccess;
+  const modalOpen = showAddressForm || showSuccess;
 
   useEffect(() => {
     if (!modalOpen) {
-      return;
+      return undefined;
     }
 
     const previousOverflow = document.body.style.overflow;
@@ -226,17 +239,42 @@ function Cart() {
   }, [modalOpen]);
 
   // =========================================================
+  // REMOVE ITEM
+  // =========================================================
+
+  const handleRemove = (itemId) => {
+    removeFromCart(itemId);
+    removeWeight(itemId);
+  };
+
+  // =========================================================
   // CLEAR CART
   // =========================================================
 
   const clearCartSafe = () => {
     if (typeof clearCart === "function") {
       clearCart();
-      return;
+    } else {
+      cart.forEach((item) => {
+        removeFromCart(item.id);
+      });
     }
 
-    cart.forEach((item) => {
-      removeFromCart(item.id);
+    clearWeights();
+  };
+
+  // =========================================================
+  // WISHLIST -> CART
+  // =========================================================
+
+  const cartIds = new Set(cart.map((item) => String(item.id)));
+
+  const addWishlistItemToCart = (item) => {
+    saveWeight(item.id, 1);
+
+    addToCart({
+      ...item,
+      weight: 1,
     });
   };
 
@@ -443,9 +481,11 @@ function Cart() {
   };
 
   // =========================================================
-  // PLACE ORDER
+  // CHECKOUT
   //
-  // Delivery Details -> Payment
+  // Opens the full Checkout page (shipping + payment).
+  // The KG chosen for every item is already saved in
+  // localStorage, so the Checkout page picks it up.
   // =========================================================
 
   const handlePlaceOrder = () => {
@@ -459,135 +499,7 @@ function Cart() {
       return;
     }
 
-    setShowDetails(true);
-  };
-
-  // =========================================================
-  // DELIVERY DETAILS SUBMIT
-  // =========================================================
-
-  const handleDetailsSubmit = (details) => {
-    setDeliveryDetails(details);
-
-    // Freeze cart + weight snapshot
-    setCheckout({
-      items: cart.map((item) => {
-        const weight = getItemWeight(item);
-        const quantity = item.quantity || 1;
-        const unitPrice = Number(item.price || 0);
-
-        return {
-          ...item,
-
-          weight,
-          weightLabel: formatWeight(weight),
-
-          quantity,
-
-          unitPrice,
-
-          amount: unitPrice * weight * quantity,
-        };
-      }),
-
-      total: totalAmount,
-    });
-
-    setShowDetails(false);
-
-    setShowPayment(true);
-  };
-
-  // =========================================================
-  // PAYMENT BACK
-  // =========================================================
-
-  const handlePaymentBack = () => {
-    setShowPayment(false);
-
-    setShowDetails(true);
-  };
-
-  // =========================================================
-  // PAYMENT CLOSE
-  // =========================================================
-
-  const handlePaymentClose = () => {
-    setShowPayment(false);
-  };
-
-  // =========================================================
-  // PAYMENT DONE
-  // =========================================================
-
-  const handlePaymentDone = () => {
-    setShowPayment(false);
-
-    setCheckout(null);
-
-    setDeliveryDetails(null);
-  };
-
-  // =========================================================
-  // PAYMENT COMPLETE
-  // =========================================================
-
-  const handlePaymentComplete = async (payment) => {
-    if (!user) {
-      throw new Error("Please log in to place an order.");
-    }
-
-    if (!checkout || !deliveryDetails) {
-      throw new Error("Order details are missing.");
-    }
-
-    const order = {
-      id: Date.now().toString(),
-
-      items: checkout.items,
-
-      total: checkout.total,
-
-      placedAt: new Date().toISOString(),
-
-      status: "placed",
-
-      payment,
-
-      address: {
-        fullName: deliveryDetails.fullName,
-
-        houseNo: deliveryDetails.address1,
-
-        street: deliveryDetails.address2,
-
-        city: deliveryDetails.city,
-
-        pincode: deliveryDetails.pincode,
-
-        phone: deliveryDetails.mobile,
-
-        altPhone: deliveryDetails.altPhone || "",
-
-        instructions: deliveryDetails.instructions || "",
-      },
-    };
-
-    const ordersRef = doc(db, "orders", user.uid);
-
-    const docSnap = await getDoc(ordersRef);
-
-    if (docSnap.exists()) {
-      await updateDoc(ordersRef, {
-        data: arrayUnion(order),
-      });
-    } else {
-      await setDoc(ordersRef, {
-        data: [order],
-      });
-    }
-
-    clearCartSafe();
+    navigate("/checkout");
   };
 
   // =========================================================
@@ -599,238 +511,371 @@ function Cart() {
       <Navbar />
 
       {/* =====================================================
+          HEADER BAND
+      ===================================================== */}
+
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#06472a] via-[#075c35] to-[#0b7040] text-white">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-70"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.10) 1px, transparent 0)",
+            backgroundSize: "22px 22px",
+          }}
+        />
+
+        <div className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-[#9bdd45]/15 blur-2xl" />
+
+        <div className="relative mx-auto flex max-w-[1400px] flex-wrap items-end justify-between gap-4 px-4 py-9 sm:px-6 lg:px-10">
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45 }}
+          >
+            <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold">
+              <FaShoppingBasket />
+              Your basket
+            </p>
+
+            <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Shopping <span className="text-[#c8f26b]">Cart</span>
+            </h1>
+
+            <p className="mt-2 text-sm text-green-100">
+              Select your preferred weight and quantity.
+            </p>
+          </motion.div>
+
+          {cart.length > 0 && (
+            <div className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 backdrop-blur-sm">
+              <p className="text-[11px] font-medium text-green-100">
+                {itemCount} item{itemCount !== 1 ? "s" : ""} · Total
+              </p>
+
+              <p className="text-2xl font-extrabold">
+                ₹{formatPrice(totalAmount)}
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* =====================================================
           CART SECTION
       ===================================================== */}
 
-      <main className="page-content flex-grow px-4 py-20 sm:px-6 lg:px-10">
-        <div className="bg-white border border-[#dbe8d7] rounded-2xl shadow-lg p-4 sm:p-6 max-w-6xl mx-auto">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-6">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#075c35]">
-                Shopping Cart
-              </h1>
+      <main className="page-content mx-auto w-full max-w-[1400px] flex-grow px-4 py-8 sm:px-6 lg:px-10">
+        {/* STEPPER */}
 
-              <p className="text-sm text-[#718579] mt-1">
-                Select your preferred weight and quantity.
-              </p>
+        <CheckoutStepper current={1} />
+
+        {cart.length === 0 ? (
+          /* =================================================
+              EMPTY CART
+          ================================================= */
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-8 rounded-3xl border border-dashed border-[#c9dcc4] bg-white px-6 py-16 text-center"
+          >
+            <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-[#eaf5e5] text-4xl text-[#158447]">
+              <FaShoppingBasket />
             </div>
 
-            {cart.length > 0 && (
-              <div className="text-sm font-semibold text-[#158447]">
-                {itemCount} item
-                {itemCount !== 1 ? "s" : ""}
+            <h2 className="mt-5 text-2xl font-extrabold text-[#083f26]">
+              Your cart is empty
+            </h2>
+
+            <p className="mx-auto mt-2 max-w-sm text-sm text-[#718579]">
+              Looks like you haven't added anything yet. Fresh fruits and
+              vegetables are waiting for you.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => navigate("/products")}
+              className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#075c35] to-[#158447] px-7 py-3 text-sm font-extrabold text-white shadow-lg shadow-[#075c35]/25 transition hover:-translate-y-0.5"
+            >
+              Browse products
+              <FaArrowRight />
+            </button>
+          </motion.div>
+        ) : (
+          <div className="mt-8 grid items-start gap-6 lg:grid-cols-[1fr_390px]">
+            {/* =================================================
+                ITEMS
+            ================================================= */}
+
+            <div>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-xl font-extrabold text-[#083f26]">
+                  Selected items
+                  <span className="ml-2 rounded-full bg-[#eaf5e5] px-2.5 py-0.5 text-xs font-bold text-[#075c35]">
+                    {cart.length}
+                  </span>
+                </h2>
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/products")}
+                  className="inline-flex items-center gap-2 text-sm font-bold text-[#075c35] hover:underline"
+                >
+                  <FaArrowLeft className="text-xs" />
+                  Continue shopping
+                </button>
               </div>
-            )}
-          </div>
 
-          {cart.length === 0 ? (
-            <div className="py-16 text-center">
-              <p className="text-[#718579] text-lg">Your cart is empty.</p>
-            </div>
-          ) : (
-            <div>
-              {/* =================================================
-                  CART TABLE
-              ================================================= */}
+              <ul className="space-y-4">
+                <AnimatePresence initial={false}>
+                  {cart.map((item) => {
+                    const weight = getItemWeight(item);
 
-              <div className="overflow-x-auto rounded-xl border border-[#dbe8d7]">
-                <table className="w-full border-collapse min-w-[850px]">
-                  <thead>
-                    <tr className="bg-[#eaf5e5] text-[#075c35] border-b border-[#dbe8d7]">
-                      <th className="p-3 text-left">Item</th>
+                    const quantity = item.quantity || 1;
 
-                      <th className="p-3 text-center">KG</th>
+                    const itemTotal = getItemTotal(item);
 
-                      <th className="p-3 text-center">Quantity</th>
+                    return (
+                      <motion.li
+                        key={item.id}
+                        layout
+                        initial={{
+                          opacity: 0,
+                          y: 24,
+                        }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                        }}
+                        exit={{
+                          opacity: 0,
+                          x: -40,
+                        }}
+                        transition={{
+                          duration: 0.3,
+                        }}
+                        className="group rounded-3xl border border-[#dbe8d7] bg-white p-4 shadow-sm transition-shadow duration-300 hover:shadow-lg hover:shadow-[#075c35]/10 sm:p-5"
+                      >
+                        <div className="flex gap-4">
+                          {/* IMAGE */}
 
-                      <th className="p-3 text-center">Price / KG</th>
+                          <Thumb
+                            src={getItemImage(item)}
+                            alt={item.name}
+                            className="h-24 w-24 shrink-0 rounded-2xl border border-[#dbe8d7] sm:h-28 sm:w-28"
+                          />
 
-                      <th className="p-3 text-center">Amount</th>
+                          <div className="flex min-w-0 flex-1 flex-col">
+                            {/* NAME + REMOVE */}
 
-                      <th className="p-3 text-center">Remove</th>
-                    </tr>
-                  </thead>
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <h3 className="truncate text-base font-extrabold text-[#083f26] sm:text-lg">
+                                  {item.name}
+                                </h3>
 
-                  <tbody>
-                    <AnimatePresence>
-                      {cart.map((item) => {
-                        const weight = getItemWeight(item);
+                                <p className="mt-0.5 text-xs text-[#718579]">
+                                  ₹{formatPrice(item.price)} per KG
+                                </p>
 
-                        const quantity = item.quantity || 1;
-
-                        const itemTotal = getItemTotal(item);
-
-                        return (
-                          <motion.tr
-                            key={item.id}
-                            layout
-                            initial={{
-                              opacity: 0,
-                              y: 30,
-                            }}
-                            animate={{
-                              opacity: 1,
-                              y: 0,
-                            }}
-                            exit={{
-                              opacity: 0,
-                              y: -30,
-                            }}
-                            className="border-b border-[#dbe8d7] hover:bg-[#f7fbf4] transition"
-                          >
-                            {/* =========================
-                                ITEM
-                            ========================== */}
-
-                            <td className="p-4">
-                              <div className="flex items-center gap-4 min-w-[220px]">
-                                <motion.img
-                                  src={item.image}
-                                  alt={item.name}
-                                  className="w-16 h-16 object-cover rounded-lg shadow-sm border border-[#dbe8d7] flex-shrink-0"
-                                  layout
-                                />
-
-                                <div>
-                                  <h2 className="font-semibold text-[#083f26]">
-                                    {item.name}
-                                  </h2>
-
-                                  <p className="text-xs text-[#718579] mt-1">
-                                    ₹{formatPrice(item.price)} per KG
-                                  </p>
-                                </div>
-                              </div>
-                            </td>
-
-                            {/* =========================
-                                KG / WEIGHT
-                            ========================== */}
-
-                            <td className="p-4 text-center">
-                              <select
-                                value={weight}
-                                onChange={(e) =>
-                                  updateWeight(item.id, Number(e.target.value))
-                                }
-                                className="min-w-[105px] px-3 py-2.5 bg-white border border-[#dbe8d7] rounded-lg text-[#075c35] font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-[#158447] focus:border-[#158447] cursor-pointer"
-                              >
-                                {WEIGHT_OPTIONS.map((option) => (
-                                  <option
-                                    key={option.value}
-                                    value={option.value}
-                                  >
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </td>
-
-                            {/* =========================
-                                QUANTITY
-                            ========================== */}
-
-                            <td className="p-4 text-center">
-                              <div className="flex justify-center items-center gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    updateQuantity(
-                                      item.id,
-                                      Math.max(1, quantity - 1),
-                                    )
-                                  }
-                                  className="w-8 h-8 bg-[#eaf5e5] hover:bg-[#dcefd5] text-[#075c35] border border-[#dbe8d7] rounded-lg font-bold transition"
-                                >
-                                  -
-                                </button>
-
-                                <span className="px-3 py-1 bg-[#f7fbf4] border border-[#dbe8d7] text-[#083f26] rounded-lg font-medium min-w-[42px]">
-                                  {quantity}
-                                </span>
-
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    updateQuantity(item.id, quantity + 1)
-                                  }
-                                  className="w-8 h-8 bg-[#158447] hover:bg-[#0b7040] text-white rounded-lg font-bold transition"
-                                >
-                                  +
-                                </button>
-                              </div>
-                            </td>
-
-                            {/* =========================
-                                PRICE PER KG
-                            ========================== */}
-
-                            <td className="p-4 text-center text-[#158447] font-medium">
-                              ₹{formatPrice(item.price)}
-                            </td>
-
-                            {/* =========================
-                                AMOUNT
-                            ========================== */}
-
-                            <td className="p-4 text-center">
-                              <div className="font-semibold text-[#083f26]">
-                                ₹{formatPrice(itemTotal)}
+                                {item.category && (
+                                  <span className="mt-1.5 inline-block rounded-full bg-[#eaf5e5] px-2.5 py-0.5 text-[10px] font-extrabold capitalize text-[#158447]">
+                                    {item.category}
+                                  </span>
+                                )}
                               </div>
 
-                              <div className="text-xs text-[#718579] mt-1">
-                                {formatWeight(weight)} × {quantity}
-                              </div>
-                            </td>
-
-                            {/* =========================
-                                REMOVE
-                            ========================== */}
-
-                            <td className="p-4 text-center">
                               <button
                                 type="button"
-                                onClick={() => removeFromCart(item.id)}
-                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition"
+                                onClick={() => handleRemove(item.id)}
+                                aria-label={`Remove ${item.name}`}
+                                className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-red-50 text-sm text-red-500 transition hover:bg-red-500 hover:text-white"
                               >
-                                ✕
+                                <FaTrash />
                               </button>
-                            </td>
-                          </motion.tr>
-                        );
-                      })}
-                    </AnimatePresence>
-                  </tbody>
-                </table>
-              </div>
+                            </div>
 
-              {/* =================================================
-                  TOTAL & ORDER BUTTONS
-              ================================================= */}
+                            {/* CONTROLS + AMOUNT */}
 
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-6 gap-4">
-                <div>
-                  <p className="text-lg font-semibold text-[#083f26]">
-                    Total:{" "}
-                    <span className="text-[#158447]">
-                      ₹{formatPrice(totalAmount)}
-                    </span>
-                  </p>
+                            <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
+                              <div className="flex flex-wrap items-end gap-4">
+                                {/* WEIGHT */}
 
-                  <p className="text-xs text-[#718579] mt-1">
+                                <label className="block">
+                                  <span className="mb-1 block text-[11px] font-bold text-[#718579]">
+                                    Weight
+                                  </span>
+
+                                  <select
+                                    value={weight}
+                                    onChange={(e) =>
+                                      updateWeight(item.id, e.target.value)
+                                    }
+                                    className="min-w-[105px] cursor-pointer rounded-xl border border-[#dbe8d7] bg-[#fbfdf9] px-3 py-2.5 text-sm font-bold text-[#075c35] outline-none transition focus:border-[#158447] focus:ring-4 focus:ring-[#158447]/15"
+                                  >
+                                    {WEIGHT_OPTIONS.map((option) => (
+                                      <option
+                                        key={option.value}
+                                        value={option.value}
+                                      >
+                                        {option.label}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </label>
+
+                                {/* QUANTITY */}
+
+                                <div>
+                                  <span className="mb-1 block text-[11px] font-bold text-[#718579]">
+                                    Quantity
+                                  </span>
+
+                                  <div className="flex items-center rounded-xl bg-[#eaf5e5] p-1 ring-1 ring-[#bcd6b6]">
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        updateQuantity(
+                                          item.id,
+                                          Math.max(1, quantity - 1),
+                                        )
+                                      }
+                                      disabled={quantity <= 1}
+                                      aria-label="Decrease quantity"
+                                      className="grid h-8 w-8 place-items-center rounded-lg bg-white text-[#075c35] shadow-sm transition hover:bg-[#f7fbf4] disabled:opacity-40"
+                                    >
+                                      <FaMinus className="text-[10px]" />
+                                    </button>
+
+                                    <span className="w-9 text-center text-sm font-extrabold text-[#06472a]">
+                                      {quantity}
+                                    </span>
+
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        updateQuantity(item.id, quantity + 1)
+                                      }
+                                      aria-label="Increase quantity"
+                                      className="grid h-8 w-8 place-items-center rounded-lg bg-[#075c35] text-white transition hover:bg-[#0b7040]"
+                                    >
+                                      <FaPlus className="text-[10px]" />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* AMOUNT */}
+
+                              <div className="text-right">
+                                <motion.p
+                                  key={itemTotal}
+                                  initial={{ scale: 0.92, opacity: 0.6 }}
+                                  animate={{ scale: 1, opacity: 1 }}
+                                  className="text-xl font-extrabold text-[#075c35]"
+                                >
+                                  ₹{formatPrice(itemTotal)}
+                                </motion.p>
+
+                                <p className="text-[11px] text-[#718579]">
+                                  {formatWeight(weight)} × {quantity}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.li>
+                    );
+                  })}
+                </AnimatePresence>
+              </ul>
+            </div>
+
+            {/* =================================================
+                ORDER SUMMARY
+            ================================================= */}
+
+            <aside className="lg:sticky lg:top-6">
+              <div className="overflow-hidden rounded-3xl border border-[#dbe8d7] bg-white shadow-lg shadow-[#075c35]/10">
+                <div className="bg-gradient-to-br from-[#06472a] to-[#0b7040] px-6 py-4 text-white">
+                  <h2 className="text-lg font-extrabold">Order summary</h2>
+
+                  <p className="text-xs text-green-100">
                     Weight and quantity are included in the total.
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="space-y-4 p-6">
+                  {/* FREE DELIVERY BAR */}
+
+                  <div className="rounded-2xl bg-[#f1f8ed] p-4">
+                    <div className="flex items-center gap-2 text-sm font-bold text-[#075c35]">
+                      <FaTruck />
+
+                      {remainingForFree > 0
+                        ? `Add ₹${formatPrice(remainingForFree)} more for free delivery`
+                        : "You've unlocked free delivery!"}
+                    </div>
+
+                    <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-[#dbe8d7]">
+                      <motion.div
+                        className="h-full rounded-full bg-gradient-to-r from-[#158447] to-[#9bdd45]"
+                        initial={false}
+                        animate={{
+                          width: `${freeProgress}%`,
+                        }}
+                        transition={{
+                          duration: 0.5,
+                          ease: "easeOut",
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* LINES */}
+
+                  <div className="space-y-2.5 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-[#718579]">Items</span>
+
+                      <span className="font-bold text-[#083f26]">
+                        {itemCount}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span className="text-[#718579]">Subtotal</span>
+
+                      <span className="font-bold text-[#083f26]">
+                        ₹{formatPrice(totalAmount)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-end justify-between border-t border-dashed border-[#d3e3cf] pt-4">
+                    <span className="text-base font-extrabold text-[#083f26]">
+                      Total
+                    </span>
+
+                    <motion.span
+                      key={totalAmount}
+                      initial={{ scale: 0.92, opacity: 0.6 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="text-3xl font-extrabold text-[#075c35]"
+                    >
+                      ₹{formatPrice(totalAmount)}
+                    </motion.span>
+                  </div>
+
                   {/* PLACE ORDER */}
 
                   <button
                     type="button"
                     onClick={handlePlaceOrder}
-                    className="bg-gradient-to-r from-[#075c35] to-[#158447] hover:-translate-y-0.5 text-white px-6 py-3 rounded-xl shadow-md hover:shadow-lg font-semibold transition duration-200"
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#075c35] to-[#158447] py-3.5 text-base font-extrabold text-white shadow-lg shadow-[#075c35]/25 transition duration-200 hover:-translate-y-0.5 hover:shadow-xl"
                   >
-                    Place Order
+                    Checkout
+                    <FaArrowRight />
                   </button>
 
                   {/* WHATSAPP ORDER */}
@@ -838,52 +883,120 @@ function Cart() {
                   <button
                     type="button"
                     onClick={handleOrderNow}
-                    className="bg-white hover:bg-[#f1f8ed] text-[#075c35] border border-[#075c35] px-6 py-3 rounded-xl font-medium transition duration-200"
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#075c35] bg-white py-3 text-sm font-bold text-[#075c35] transition duration-200 hover:bg-[#f1f8ed]"
                   >
-                    Order Via WhatsApp →
+                    <FaWhatsapp className="text-lg text-[#25d366]" />
+                    Order Via WhatsApp
                   </button>
+
+                  <p className="flex items-center justify-center gap-2 text-[11px] font-semibold text-[#9aa99f]">
+                    <FaLock />
+                    Secure checkout · Protected payments
+                  </p>
                 </div>
               </div>
+            </aside>
+          </div>
+        )}
+
+        {/* =====================================================
+            WISHLIST
+        ===================================================== */}
+
+        {wishlist.items.length > 0 && (
+          <section className="mt-12">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="flex items-center gap-2 text-xl font-extrabold text-[#083f26]">
+                <FaHeart className="text-red-500" />
+                Saved in your wishlist
+                <span className="rounded-full bg-[#eaf5e5] px-2.5 py-0.5 text-xs font-bold text-[#075c35]">
+                  {wishlist.count}
+                </span>
+              </h2>
             </div>
-          )}
-        </div>
+
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 xl:grid-cols-4 xl:gap-5">
+              {wishlist.items.map((item, index) => {
+                const inCart = cartIds.has(String(item.id));
+
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 14 }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      transition: {
+                        delay: Math.min(index, 7) * 0.05,
+                      },
+                    }}
+                    className="group flex flex-col overflow-hidden rounded-3xl border border-[#dbe8d7] bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-[#075c35]/10"
+                  >
+                    <div className="relative h-32 overflow-hidden sm:h-40">
+                      <Thumb
+                        src={item.image}
+                        alt={item.name}
+                        className="h-full w-full transition-transform duration-500 group-hover:scale-105"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => wishlist.remove(item.id)}
+                        aria-label="Remove from wishlist"
+                        className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/95 text-red-500 shadow-md transition hover:scale-110"
+                      >
+                        <FaHeart />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-1 flex-col p-3 sm:p-4">
+                      {item.category && (
+                        <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#158447]">
+                          {item.category}
+                        </span>
+                      )}
+
+                      <h3 className="truncate text-sm font-extrabold text-[#083f26] sm:text-base">
+                        {item.name}
+                      </h3>
+
+                      <p className="mt-1 text-lg font-extrabold text-[#075c35]">
+                        ₹{formatPrice(item.price)}
+                        <span className="ml-1 text-xs font-semibold text-[#718579]">
+                          / KG
+                        </span>
+                      </p>
+
+                      <button
+                        type="button"
+                        disabled={inCart}
+                        onClick={() => addWishlistItemToCart(item)}
+                        className={`mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-2.5 text-sm font-extrabold transition ${
+                          inCart
+                            ? "cursor-default bg-[#eaf5e5] text-[#158447]"
+                            : "bg-gradient-to-r from-[#075c35] to-[#158447] text-white shadow-md shadow-[#075c35]/25 hover:shadow-lg"
+                        }`}
+                      >
+                        {inCart ? (
+                          <>
+                            <FaCheck /> In cart
+                          </>
+                        ) : (
+                          <>
+                            <FaShoppingCart /> Add to Cart
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </main>
 
       <Footer />
-
-      {/* =========================================================
-          DELIVERY DETAILS POPUP
-
-          IMPORTANT:
-          Wrapper z-index is higher than navbar.
-      ========================================================= */}
-
-      <div className="relative z-[10050]">
-        <DeliveryDetailsModal
-          open={showDetails}
-          initialValues={deliveryDetails}
-          itemCount={itemCount}
-          total={totalAmount}
-          onCancel={() => setShowDetails(false)}
-          onSubmit={handleDetailsSubmit}
-        />
-      </div>
-
-      {/* =========================================================
-          PAYMENT POPUP
-      ========================================================= */}
-
-      <div className="relative z-[10050]">
-        <PaymentModal
-          open={showPayment}
-          amount={checkout?.total ?? 0}
-          customer={deliveryDetails}
-          onBack={handlePaymentBack}
-          onClose={handlePaymentClose}
-          onPaymentComplete={handlePaymentComplete}
-          onDone={handlePaymentDone}
-        />
-      </div>
 
       {/* =========================================================
           WHATSAPP ADDRESS FORM MODAL
@@ -904,7 +1017,7 @@ function Cart() {
             }}
           >
             <motion.div
-              className="bg-white border border-[#dbe8d7] rounded-2xl p-6 sm:p-7 shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+              className="bg-white border border-[#dbe8d7] rounded-3xl p-6 sm:p-7 shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
               initial={{
                 scale: 0.95,
                 opacity: 0,
@@ -922,7 +1035,7 @@ function Cart() {
               }}
             >
               <div className="mb-5">
-                <h2 className="text-2xl font-bold text-[#075c35]">
+                <h2 className="text-2xl font-extrabold text-[#075c35]">
                   Enter Delivery Address
                 </h2>
 
@@ -1026,7 +1139,7 @@ function Cart() {
             }}
           >
             <motion.div
-              className="bg-white border border-[#dbe8d7] rounded-2xl p-7 shadow-2xl max-w-md w-full text-center"
+              className="bg-white border border-[#dbe8d7] rounded-3xl p-7 shadow-2xl max-w-md w-full text-center"
               initial={{
                 scale: 0.95,
                 opacity: 0,
@@ -1044,7 +1157,7 @@ function Cart() {
                 ✅
               </div>
 
-              <h2 className="text-2xl font-bold mb-3 text-[#075c35]">
+              <h2 className="text-2xl font-extrabold mb-3 text-[#075c35]">
                 Order Placed!
               </h2>
 

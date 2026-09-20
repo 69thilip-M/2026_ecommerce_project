@@ -18,7 +18,7 @@ import Reveal from "../components/Reveal";
   (If you use a PNG, just change the extension below.)
 */
 // import contactHero from "../assets/images/contact-hero.jpg";
-import contactHero from "../assets/images/banner-home.jpg";
+import contactHero from "../assets/images/contact_banner.jpg";
 
 import {
   FaFacebookF,

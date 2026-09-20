@@ -19,7 +19,7 @@ import productsData from "./productsData";
   (If you use a PNG, just change the extension below.)
 */
 // import aboutHero from "../assets/images/about-hero.jpg";
-import aboutHero from "../assets/images/banner-home.jpg";
+import aboutHero from "../assets/images/aboutpage_banner.png";
 import {
   FaSeedling,
   FaTruck,
@@ -258,7 +258,9 @@ function About() {
                 <p className="text-sm font-extrabold text-[#083f26]">
                   Since 2024
                 </p>
-                <p className="text-[11px] text-[#718579]">Serving fresh daily</p>
+                <p className="text-[11px] text-[#718579]">
+                  Serving fresh daily
+                </p>
               </div>
             </motion.div>
 

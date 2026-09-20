@@ -13,6 +13,7 @@ import AddTestimonial from "./components/AddTestimonial";
 import Blog from "./pages/Blog";
 import BlogDetail from "./pages/BlogDetails";
 import Contact from "./pages/Contact";
+import Checkout from "./pages/Checkout";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route path="/about" element={<About />}></Route>
         <Route path="/contact" element={<Contact />}></Route>
         <Route path="/cart" element={<Cart />}></Route>
+        <Route path="/checkout" element={<Checkout />} />
         <Route path="/add-product" element={<AddProduct />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/edit-product/:id" element={<EditProduct />} />
