@@ -1,14 +1,10 @@
 import { NavLink, useNavigate } from "react-router-dom";
-
 import { useEffect, useRef, useState } from "react";
-
 import { getAuth, signOut } from "firebase/auth";
 
 import { useCart } from "../context/CartContext";
-
 import { useTheme } from "../context/ThemeContext";
 
-import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
@@ -19,29 +15,25 @@ function Navbar() {
   const navigate = useNavigate();
 
   const { cart, user } = useCart();
-
   const { theme, toggleTheme } = useTheme();
 
   const [menuOpen, setMenuOpen] = useState(false);
-
   const [profileOpen, setProfileOpen] = useState(false);
-
-  const [query, setQuery] = useState("");
 
   const profileRef = useRef(null);
 
-  // =========================
+  // =====================================================
   // CART ITEM COUNT
-  // =========================
+  // =====================================================
 
   const totalItems = cart.reduce(
     (total, item) => total + (item.quantity || 1),
     0,
   );
 
-  // =========================
+  // =====================================================
   // NAVIGATION LINKS
-  // =========================
+  // =====================================================
 
   const links = [
     ["Home", "/home"],
@@ -51,47 +43,34 @@ function Navbar() {
     ["Blog", "/blog"],
   ];
 
-  // =========================
-  // CLOSE PROFILE DROPDOWN
-  // =========================
+  // =====================================================
+  // CLOSE PROFILE DROPDOWN WHEN CLICKING OUTSIDE
+  // =====================================================
 
   useEffect(() => {
-    const close = (event) => {
+    const handleOutsideClick = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setProfileOpen(false);
       }
     };
 
-    document.addEventListener("mousedown", close);
+    document.addEventListener("mousedown", handleOutsideClick);
 
     return () => {
-      document.removeEventListener("mousedown", close);
+      document.removeEventListener("mousedown", handleOutsideClick);
     };
   }, []);
 
-  // =========================
-  // SEARCH
-  // =========================
-
-  const submitSearch = (event) => {
-    event.preventDefault();
-
-    navigate("/products", {
-      state: {
-        search: query,
-      },
-    });
-  };
-
-  // =========================
+  // =====================================================
   // LOGOUT
-  // =========================
+  // =====================================================
 
   const logout = async () => {
     try {
       await signOut(getAuth());
 
       setProfileOpen(false);
+      setMenuOpen(false);
 
       navigate("/");
     } catch (error) {
@@ -99,55 +78,74 @@ function Navbar() {
     }
   };
 
+  // =====================================================
+  // CLOSE MOBILE MENU
+  // =====================================================
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+    setProfileOpen(false);
+  };
+
   return (
     <header className="fresh-header">
-      {/* =========================
+      {/* =================================================
           OFFER BAR
-      ========================= */}
+      ================================================== */}
 
       <div className="fresh-offer">
         <span className="offer-pill">Fresh morning sale</span>
 
-        <span>Selected orders from Rs 100,000 get free delivery</span>
+        <span className="offer-text">
+          Selected orders from Rs 100,000 get free delivery
+        </span>
 
         <button type="button" onClick={() => navigate("/products")}>
           View offers
         </button>
       </div>
 
-      {/* =========================
+      {/* =================================================
           MAIN NAVBAR
-      ========================= */}
+      ================================================== */}
 
       <div className="fresh-mainbar">
-        {/* LOGO */}
+        {/* =================================================
+            LEFT - LOGO
+        ================================================== */}
 
-        <NavLink to="/home" className="fresh-brand">
+        <NavLink to="/home" className="fresh-brand" onClick={closeMenu}>
           KMR <span>FRESH</span>
         </NavLink>
 
-        {/* SEARCH */}
+        {/* =================================================
+            CENTER - NAVIGATION
+        ================================================== */}
 
-        <form className="fresh-search" onSubmit={submitSearch}>
-          <SearchRoundedIcon fontSize="small" />
+        <nav className={`fresh-nav ${menuOpen ? "is-open" : ""}`}>
+          {links.map(([label, path]) => (
+            <NavLink
+              key={path}
+              to={path}
+              onClick={closeMenu}
+              className={({ isActive }) => (isActive ? "active" : "")}
+            >
+              {label}
+            </NavLink>
+          ))}
+        </nav>
 
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search fruit, vegetables, dairy, offers..."
-          />
-
-          <button type="submit">Search</button>
-        </form>
-
-        {/* ACTIONS */}
+        {/* =================================================
+            RIGHT - ACTIONS
+        ================================================== */}
 
         <div className="fresh-actions">
           {/* LOCATION */}
 
           <button className="location-button" type="button">
             <LocationOnOutlinedIcon fontSize="small" />
-            KMR Store
+
+            <span>KMR Store</span>
           </button>
 
           {/* LOGIN */}
@@ -162,25 +160,24 @@ function Navbar() {
             </button>
           )}
 
-          {/* =========================
-              CART
-          ========================= */}
+          {/* CART */}
 
           <button
             className="cart-button"
             type="button"
-            onClick={() => navigate("/cart")}
+            onClick={() => {
+              navigate("/cart");
+              closeMenu();
+            }}
           >
             <ShoppingCartOutlinedIcon fontSize="small" />
 
-            <span>Cart</span>
+            <span className="cart-label">Cart</span>
 
             <b>{totalItems}</b>
           </button>
 
-          {/* =========================
-              PROFILE
-          ========================= */}
+          {/* PROFILE */}
 
           {user && (
             <div className="profile-menu" ref={profileRef}>
@@ -189,9 +186,10 @@ function Navbar() {
                 type="button"
                 onClick={() => setProfileOpen(!profileOpen)}
                 aria-label="Open account menu"
+                aria-expanded={profileOpen}
               >
                 {user.photoURL ? (
-                  <img src={user.photoURL} alt="" />
+                  <img src={user.photoURL} alt="Profile" />
                 ) : (
                   <AccountCircleOutlinedIcon />
                 )}
@@ -202,6 +200,7 @@ function Navbar() {
               {profileOpen && (
                 <div className="profile-dropdown">
                   <button
+                    type="button"
                     onClick={() => {
                       navigate("/profile");
                       setProfileOpen(false);
@@ -211,6 +210,7 @@ function Navbar() {
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => {
                       toggleTheme();
                       setProfileOpen(false);
@@ -219,7 +219,7 @@ function Navbar() {
                     {theme === "light" ? "Dark theme" : "Light theme"}
                   </button>
 
-                  <button className="logout" onClick={logout}>
+                  <button type="button" className="logout" onClick={logout}>
                     Logout
                   </button>
                 </div>
@@ -228,28 +228,20 @@ function Navbar() {
           )}
         </div>
 
-        {/* MOBILE MENU */}
+        {/* =================================================
+            MOBILE MENU BUTTON
+        ================================================== */}
 
         <button
           className="fresh-menu"
+          type="button"
           aria-label="Toggle navigation"
+          aria-expanded={menuOpen}
           onClick={() => setMenuOpen(!menuOpen)}
         >
           {menuOpen ? <CloseRoundedIcon /> : <MenuRoundedIcon />}
         </button>
       </div>
-
-      {/* =========================
-          NAVIGATION
-      ========================= */}
-
-      <nav className={`fresh-nav ${menuOpen ? "is-open" : ""}`}>
-        {links.map(([label, path]) => (
-          <NavLink key={path} to={path} onClick={() => setMenuOpen(false)}>
-            {label}
-          </NavLink>
-        ))}
-      </nav>
     </header>
   );
 }

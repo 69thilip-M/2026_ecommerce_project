@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Slider from "react-slick";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebase";
@@ -6,6 +6,14 @@ import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+
+import FormatQuoteRoundedIcon from "@mui/icons-material/FormatQuoteRounded";
+import StarRoundedIcon from "@mui/icons-material/StarRounded";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import VerifiedRoundedIcon from "@mui/icons-material/VerifiedRounded";
+import RateReviewOutlinedIcon from "@mui/icons-material/RateReviewOutlined";
+import EnergySavingsLeafOutlinedIcon from "@mui/icons-material/EnergySavingsLeafOutlined";
 
 /* ---------------------------------------------------------
    Avatar helpers
@@ -20,14 +28,14 @@ const getInitials = (name = "") => {
   return (letters || "GU").toUpperCase(); // "GU" = Guest fallback
 };
 
-// Every user always gets the same color, picked from their name
+// Every user always gets the same colour, picked from their name
 const AVATAR_GRADIENTS = [
-  "from-[#06472a] to-[#158447]",
-  "from-[#0b7040] to-[#5eaa32]",
-  "from-[#158447] to-[#2f9e5b]",
-  "from-[#0f766e] to-[#14b8a6]",
-  "from-[#c2410c] to-[#f59e0b]",
-  "from-[#4d7c0f] to-[#84cc16]",
+  ["#06472a", "#158447"],
+  ["#0b7040", "#5eaa32"],
+  ["#158447", "#2f9e5b"],
+  ["#0f766e", "#14b8a6"],
+  ["#c2410c", "#f59e0b"],
+  ["#4d7c0f", "#84cc16"],
 ];
 
 const getGradient = (name = "") => {
@@ -35,26 +43,19 @@ const getGradient = (name = "") => {
     (total, ch) => total + ch.charCodeAt(0),
     0,
   );
-  return AVATAR_GRADIENTS[sum % AVATAR_GRADIENTS.length];
+  const [from, to] = AVATAR_GRADIENTS[sum % AVATAR_GRADIENTS.length];
+  return `linear-gradient(135deg, ${from}, ${to})`;
 };
 
-function Avatar({ name }) {
+function Avatar({ name, small = false }) {
   return (
-    <div className="relative mx-auto mb-4 w-max">
-      <div
-        role="img"
-        aria-label={`${name || "Guest"} profile`}
-        className={`grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br ${getGradient(
-          name,
-        )} text-xl font-extrabold tracking-wide text-white shadow-lg ring-4 ring-[#eaf5e5] transition-transform duration-300 group-hover:scale-110`}
-      >
-        {getInitials(name)}
-      </div>
-
-      {/* small quote badge */}
-      <span className="absolute -bottom-1 -right-1 grid h-6 w-6 place-items-center rounded-full border border-[#dbe8d7] bg-white text-base font-black leading-none text-[#158447] shadow">
-        “
-      </span>
+    <div
+      role="img"
+      aria-label={`${name || "Guest"} profile`}
+      className={`tm-avatar ${small ? "is-small" : ""}`}
+      style={{ background: getGradient(name) }}
+    >
+      {getInitials(name)}
     </div>
   );
 }
@@ -64,6 +65,8 @@ function Avatar({ name }) {
 ---------------------------------------------------------- */
 function Testimonials() {
   const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const sliderRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -84,81 +87,182 @@ function Testimonials() {
         setTestimonials(data);
       } catch (error) {
         console.error("Error fetching testimonials:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchTestimonials();
   }, []);
 
+  const count = testimonials.length;
+
   const settings = {
+    arrows: false,
     dots: true,
-    infinite: true,
-    autoplay: true,
-    speed: 1000,
-    autoplaySpeed: 3000,
+    dotsClass: "tm-dots",
+    customPaging: (i) => (
+      <button type="button" aria-label={`Go to testimonial ${i + 1}`} />
+    ),
+    infinite: count > 3,
+    autoplay: count > 1,
+    autoplaySpeed: 4200,
+    pauseOnHover: true,
+    speed: 700,
+    cssEase: "cubic-bezier(0.22, 1, 0.36, 1)",
     slidesToShow: 3,
     slidesToScroll: 1,
-
     responsive: [
       {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 2,
-        },
+        breakpoint: 1200,
+        settings: { slidesToShow: 2, infinite: count > 2 },
       },
       {
-        breakpoint: 640,
-        settings: {
-          slidesToShow: 1,
-        },
+        breakpoint: 720,
+        settings: { slidesToShow: 1, infinite: count > 1 },
       },
     ],
   };
 
   return (
-    <div className="bg-[#f7fbf4] py-16 px-6 text-center transition-colors duration-300">
-      {/* Heading */}
-      <h2 className="text-3xl font-bold text-[#075c35] mb-8">
-        🌟 What Our Customers Say 🌟
-      </h2>
+    <section className="tm-section" aria-labelledby="testimonials-title">
+      {/* decorative background */}
+      <span className="tm-blob tm-blob-1" />
+      <span className="tm-blob tm-blob-2" />
+      <FormatQuoteRoundedIcon className="tm-watermark" />
 
-      {/* Testimonials */}
-      {testimonials.length > 0 ? (
-        // makes every card in the row the same height
-        <div className="[&_.slick-track]:flex [&_.slick-slide]:!h-auto [&_.slick-slide>div]:h-full">
-          <Slider {...settings}>
-            {testimonials.map((t) => (
-              <div key={t.id} className="h-full px-4 py-2">
-                <div className="group flex h-full min-h-[230px] flex-col items-center justify-center rounded-2xl border border-[#dbe8d7] bg-white p-6 shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-xl">
-                  {/* Profile icon: first 2 letters of the name */}
-                  <Avatar name={t.name} />
+      <div className="tm-inner">
+        {/* ---------- Header ---------- */}
+        <div className="tm-header">
+          <div className="tm-title">
+            <div className="tm-eyebrow">
+              <EnergySavingsLeafOutlinedIcon fontSize="small" />
+              <span>Customer stories</span>
+            </div>
 
-                  {/* Testimonial Text */}
-                  <p className="text-[#52665b] italic leading-relaxed">
-                    “{t.text}”
-                  </p>
+            <h2 id="testimonials-title">What our customers say</h2>
 
-                  {/* Customer Name */}
-                  <h4 className="mt-4 font-semibold text-[#075c35]">
-                    – {t.name}
-                  </h4>
+            <p>Real words from people who shop fresh with KMR.</p>
+
+            {count > 0 && (
+              <div className="tm-proof">
+                <div className="tm-stack">
+                  {testimonials.slice(0, 4).map((t) => (
+                    <Avatar key={t.id} name={t.name} small />
+                  ))}
                 </div>
-              </div>
-            ))}
-          </Slider>
-        </div>
-      ) : (
-        <p className="text-[#52665b]">No testimonials yet.</p>
-      )}
 
-      {/* Add Testimonial Button */}
-      <button
-        onClick={() => navigate("/add-testimonial")}
-        className="mt-16 px-6 py-2 bg-[#075c35] hover:bg-[#083f26] text-white rounded-lg font-semibold transition duration-300"
-      >
-        Add Testimonial
-      </button>
-    </div>
+                <span>
+                  Loved by <b>{count}</b>{" "}
+                  {count === 1 ? "customer" : "customers"}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {count > 0 && (
+            <div className="tm-nav">
+              <button
+                type="button"
+                aria-label="Previous testimonial"
+                onClick={() => sliderRef.current?.slickPrev()}
+              >
+                <ArrowBackRoundedIcon />
+              </button>
+
+              <button
+                type="button"
+                aria-label="Next testimonial"
+                onClick={() => sliderRef.current?.slickNext()}
+              >
+                <ArrowForwardRoundedIcon />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* ---------- Body ---------- */}
+        {loading ? (
+          <div className="tm-skeleton-row" aria-hidden="true">
+            <span className="tm-skeleton" />
+            <span className="tm-skeleton" />
+            <span className="tm-skeleton" />
+          </div>
+        ) : count > 0 ? (
+          <div className="tm-slider">
+            <Slider ref={sliderRef} {...settings}>
+              {testimonials.map((t) => {
+                const rating = Math.min(
+                  5,
+                  Math.max(0, Math.round(Number(t.rating) || 0)),
+                );
+
+                return (
+                  <div key={t.id} className="tm-slide">
+                    <article className="tm-card">
+                      <div className="tm-top">
+                        <span className="tm-quote">
+                          <FormatQuoteRoundedIcon />
+                        </span>
+
+                        {rating > 0 ? (
+                          <span
+                            className="tm-stars"
+                            aria-label={`${rating} out of 5 stars`}
+                          >
+                            {[1, 2, 3, 4, 5].map((n) => (
+                              <StarRoundedIcon
+                                key={n}
+                                className={n <= rating ? "on" : ""}
+                              />
+                            ))}
+                          </span>
+                        ) : (
+                          <span className="tm-chip">
+                            <VerifiedRoundedIcon />
+                            Happy customer
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="tm-text" title={t.text}>
+                        {t.text}
+                      </p>
+
+                      <div className="tm-user">
+                        <Avatar name={t.name} />
+
+                        <div>
+                          <h4>{t.name}</h4>
+                          <small>
+                            <VerifiedRoundedIcon />
+                            KMR Fresh customer
+                          </small>
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                );
+              })}
+            </Slider>
+          </div>
+        ) : (
+          <div className="tm-empty">
+            <FormatQuoteRoundedIcon />
+            <h3>No testimonials yet</h3>
+            <p>Be the first to share how KMR Fresh worked for you.</p>
+          </div>
+        )}
+
+        {/* ---------- CTA ---------- */}
+        <div className="tm-cta">
+          <button type="button" onClick={() => navigate("/add-testimonial")}>
+            <RateReviewOutlinedIcon />
+            Share your experience
+          </button>
+        </div>
+      </div>
+    </section>
   );
 }
 

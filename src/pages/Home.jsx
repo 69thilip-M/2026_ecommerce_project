@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
@@ -19,11 +19,21 @@ import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined
 import BoltOutlinedIcon from "@mui/icons-material/BoltOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import HeadsetMicOutlinedIcon from "@mui/icons-material/HeadsetMicOutlined";
+import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded";
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
+import StarRoundedIcon from "@mui/icons-material/StarRounded";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 
 function Home() {
   const navigate = useNavigate();
+  const progressRef = useRef(null);
+  const [liked, setLiked] = useState([]);
 
+  // ---------------------------------------------------
   // Scroll reveal
+  // ---------------------------------------------------
   useEffect(() => {
     const items = document.querySelectorAll(".fresh-home .reveal");
 
@@ -52,7 +62,57 @@ function Home() {
     return () => observer.disconnect();
   }, []);
 
-  // Feature cards
+  // ---------------------------------------------------
+  // Scroll progress bar
+  // ---------------------------------------------------
+  useEffect(() => {
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = max > 0 ? window.scrollY / max : 0;
+
+      if (progressRef.current) {
+        progressRef.current.style.transform = `scaleX(${Math.min(progress, 1)})`;
+      }
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
+  // ---------------------------------------------------
+  // Product card helpers
+  // ---------------------------------------------------
+  const handleTilt = (event) => {
+    const el = event.currentTarget;
+    const rect = el.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width - 0.5;
+    const y = (event.clientY - rect.top) / rect.height - 0.5;
+
+    el.style.setProperty("--ry", `${(x * 8).toFixed(2)}deg`);
+    el.style.setProperty("--rx", `${(-y * 8).toFixed(2)}deg`);
+  };
+
+  const resetTilt = (event) => {
+    event.currentTarget.style.setProperty("--ry", "0deg");
+    event.currentTarget.style.setProperty("--rx", "0deg");
+  };
+
+  const toggleLike = (event, id) => {
+    event.stopPropagation();
+    setLiked((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+    );
+  };
+
+  // ---------------------------------------------------
+  // Content
+  // ---------------------------------------------------
   const features = [
     {
       Icon: EnergySavingsLeafOutlinedIcon,
@@ -71,21 +131,33 @@ function Home() {
     },
   ];
 
-  // How it works
+  const tickerItems = [
+    "Fresh vegetables",
+    "Juicy fruits",
+    "Dairy & eggs",
+    "Daily essentials",
+    "20–30 min delivery",
+    "Free delivery above ₹1,000",
+  ];
+
   const howItWorks = [
     {
+      Icon: LocationOnOutlinedIcon,
       title: "Choose your location",
       text: "We'll match you to your nearest KMR store.",
     },
     {
+      Icon: ShoppingCartOutlinedIcon,
       title: "Add to cart",
       text: "Quick add, offers, and your order total are ready to review.",
     },
     {
+      Icon: LockOutlinedIcon,
       title: "Check out securely",
       text: "Address, delivery fee, and payment are handled end to end.",
     },
     {
+      Icon: ReceiptLongOutlinedIcon,
       title: "Track your order",
       text: "Your invoice and order updates are available in your account.",
     },
@@ -93,6 +165,9 @@ function Home() {
 
   return (
     <div className="fresh-home min-h-screen bg-[#f7fbf4] text-[#083f26] overflow-x-hidden">
+      {/* Scroll progress */}
+      <div className="scroll-progress" ref={progressRef} aria-hidden="true" />
+
       <Navbar />
 
       <main>
@@ -158,6 +233,10 @@ function Home() {
             </div>
 
             <div className="fresh-visual">
+              <span className="hero-dot d1" />
+              <span className="hero-dot d2" />
+              <span className="hero-dot d3" />
+
               <div className="visual-note">
                 <EnergySavingsLeafOutlinedIcon fontSize="small" />
 
@@ -212,11 +291,26 @@ function Home() {
         </section>
 
         {/* =========================
+            TICKER
+        ========================== */}
+
+        <section className="ticker reveal reveal-zoom" aria-hidden="true">
+          <div className="ticker-track">
+            {[...tickerItems, ...tickerItems].map((item, index) => (
+              <span key={`${item}-${index}`}>
+                <EnergySavingsLeafOutlinedIcon />
+                {item}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {/* =========================
             PRODUCTS SECTION
         ========================== */}
 
         <section className="fresh-products">
-          <div className="section-heading reveal">
+          <div className="section-heading reveal reveal-left">
             <div>
               <span>SHOP THE DAY'S BEST</span>
               <h2>Fresh picks for you</h2>
@@ -229,26 +323,86 @@ function Home() {
           </div>
 
           <div className="product-grid">
-            {productsData.slice(0, 4).map((product, index) => (
-              <article
-                key={product.id}
-                className="fresh-product-card reveal"
-                style={{
-                  "--d": `${index * 0.1}s`,
-                }}
-                onClick={() => navigate("/products")}
-              >
-                <img src={product.image} alt={product.name} />
+            {productsData.slice(0, 4).map((product, index) => {
+              const isLiked = liked.includes(product.id);
 
-                <div>
-                  <small>{product.category}</small>
+              return (
+                <article
+                  key={product.id}
+                  className="fresh-product-card reveal"
+                  style={{
+                    "--d": `${index * 0.1}s`,
+                  }}
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => navigate("/products")}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") navigate("/products");
+                  }}
+                  onMouseMove={handleTilt}
+                  onMouseLeave={resetTilt}
+                >
+                  <div className="pc-media">
+                    <img src={product.image} alt={product.name} />
 
-                  <h3>{product.name}</h3>
+                    <span className="pc-badge">
+                      <EnergySavingsLeafOutlinedIcon />
+                      Fresh today
+                    </span>
 
-                  <b>₹{product.price}</b>
-                </div>
-              </article>
-            ))}
+                    <button
+                      type="button"
+                      className={`pc-like ${isLiked ? "is-liked" : ""}`}
+                      aria-label={
+                        isLiked ? "Remove from favourites" : "Add to favourites"
+                      }
+                      aria-pressed={isLiked}
+                      onClick={(e) => toggleLike(e, product.id)}
+                    >
+                      {isLiked ? (
+                        <FavoriteRoundedIcon />
+                      ) : (
+                        <FavoriteBorderRoundedIcon />
+                      )}
+                    </button>
+
+                    <span className="pc-shine" />
+                  </div>
+
+                  <div className="pc-body">
+                    <small className="pc-cat">{product.category}</small>
+
+                    <h3>{product.name}</h3>
+
+                    <div className="pc-meta">
+                      {product.rating && (
+                        <span className="pc-rating">
+                          <StarRoundedIcon />
+                          {product.rating}
+                        </span>
+                      )}
+
+                      <span className="pc-time">
+                        <LocalShippingOutlinedIcon />
+                        20–30 min
+                      </span>
+                    </div>
+
+                    <div className="pc-foot">
+                      <b className="pc-price">₹{product.price}</b>
+
+                      <button
+                        type="button"
+                        className="pc-add"
+                        aria-label={`View ${product.name}`}
+                      >
+                        <AddRoundedIcon />
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </section>
 
@@ -256,10 +410,10 @@ function Home() {
             STORE SECTIONS
         ========================== */}
 
-        <section className="store-sections">
+        <section className="store-sections offer-block">
           {/* OFFER SECTION */}
 
-          <div className="delivery-offer reveal">
+          <div className="delivery-offer reveal reveal-zoom">
             <div className="offer-copy">
               <span>TODAY'S OFFER</span>
 
@@ -304,30 +458,56 @@ function Home() {
               <img src={bannerHome} alt="Fresh groceries ready for delivery" />
             </div>
           </div>
+        </section>
 
-          {/* HOW IT WORKS */}
+        {/* =========================
+            HOW IT WORKS (full width)
+        ========================== */}
 
-          <div className="how-it-works">
-            {howItWorks.map(({ title, text }, index) => (
-              <article
-                key={title}
-                className="reveal"
-                style={{
-                  "--d": `${index * 0.1}s`,
-                }}
-              >
-                <b>{index + 1}</b>
+        <section className="hiw-band">
+          <div className="hiw-inner">
+            <div className="hiw-title reveal">
+              <span>HOW IT WORKS</span>
+              <h2>Fresh groceries in four easy steps</h2>
+              <p>
+                From choosing your store to tracking your order, everything
+                takes just a few taps.
+              </p>
+            </div>
 
-                <h3>{title}</h3>
+            <div className="how-it-works">
+              {howItWorks.map(({ Icon, title, text }, index) => (
+                <div
+                  key={title}
+                  className="hiw-step reveal"
+                  style={{
+                    "--d": `${index * 0.12}s`,
+                  }}
+                >
+                  <div className="hiw-head">
+                    <b>{index + 1}</b>
+                    <span className="hiw-line" />
+                  </div>
 
-                <p>{text}</p>
-              </article>
-            ))}
+                  <article className="hiw-card">
+                    <div className="hiw-icon">
+                      <Icon />
+                    </div>
+
+                    <h3>{title}</h3>
+
+                    <p>{text}</p>
+                  </article>
+                </div>
+              ))}
+            </div>
           </div>
+        </section>
 
+        <section className="store-sections">
           {/* VOUCHER CALLOUT */}
 
-          <div className="voucher-callout reveal">
+          <div className="voucher-callout reveal reveal-right">
             <div>
               <span>KMR FRESH ONLINE</span>
 
@@ -390,7 +570,7 @@ function Home() {
             NEWSLETTER
         ========================== */}
 
-        <div className="reveal">
+        <div className="reveal reveal-zoom">
           <Newsletter />
         </div>
 

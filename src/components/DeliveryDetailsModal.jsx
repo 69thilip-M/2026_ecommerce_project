@@ -50,7 +50,7 @@ function validate(v) {
   if (v.altPhone && !/^\d{10}$/.test(v.altPhone))
     e.altPhone = "Enter a valid 10-digit number";
   if (!v.address1.trim()) e.address1 = "Address line 1 is required";
-  if (!v.address2.trim()) e.address2 = "Street / area is required";
+  // if (!v.address2.trim()) e.address2 = "Street / area is required";
   if (!v.city.trim()) e.city = "City is required";
   if (!/^\d{6}$/.test(v.pincode)) e.pincode = "Enter a 6-digit pincode";
 
@@ -282,6 +282,7 @@ function DetailsSheet({ initialValues, itemCount, total, onCancel, onSubmit }) {
               label="Address line 2"
               icon={LocationOnOutlinedIcon}
               error={errors.address2}
+              optional
             >
               <input
                 name="address2"

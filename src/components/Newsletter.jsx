@@ -1,58 +1,175 @@
 import { useState } from "react";
 
+import MailOutlineRoundedIcon from "@mui/icons-material/MailOutlineRounded";
+import SendRoundedIcon from "@mui/icons-material/SendRounded";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
+import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
+import NotificationsActiveOutlinedIcon from "@mui/icons-material/NotificationsActiveOutlined";
+import BoltOutlinedIcon from "@mui/icons-material/BoltOutlined";
+import EnergySavingsLeafOutlinedIcon from "@mui/icons-material/EnergySavingsLeafOutlined";
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+const perks = [
+  { Icon: LocalOfferOutlinedIcon, text: "10% off your first order" },
+  { Icon: BoltOutlinedIcon, text: "Early flash-sale alerts" },
+  { Icon: EnergySavingsLeafOutlinedIcon, text: "Seasonal fresh picks" },
+];
+
 function Newsletter() {
   const [email, setEmail] = useState("");
+  // idle | error | loading | success
+  const [status, setStatus] = useState("idle");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (event) => {
+    event.preventDefault();
 
-    if (!email) {
-      alert("Please enter your email!");
+    if (!EMAIL_PATTERN.test(email.trim())) {
+      setStatus("error");
       return;
     }
 
-    alert(`Thanks for subscribing, ${email}! 🎉`);
+    setStatus("loading");
+
+    // TODO: replace this timeout with your real subscribe API call.
+    setTimeout(() => {
+      setStatus("success");
+    }, 900);
+  };
+
+  const handleChange = (event) => {
+    setEmail(event.target.value);
+    if (status === "error") setStatus("idle");
+  };
+
+  const reset = () => {
     setEmail("");
+    setStatus("idle");
   };
 
   return (
-    <div className="bg-[#eaf5e5] py-16 px-6 text-center text-[#083f26] border-y border-[#dbe8d7]">
-      {/* Title */}
-      <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#075c35]">
-        📩 Subscribe & Get Exclusive Deals
-      </h2>
+    <section className="nl-wrap" aria-labelledby="newsletter-title">
+      <div className="nl-card">
+        <span className="nl-blob nl-blob-1" />
+        <span className="nl-blob nl-blob-2" />
 
-      <p className="mb-6 text-lg text-[#52665b]">
-        Join our newsletter to receive the best offers on fresh fruits & veggies
-        🍎🥦
-      </p>
+        {/* ---------- Left: copy + form ---------- */}
+        <div className="nl-copy">
+          <div className="nl-eyebrow">
+            <MailOutlineRoundedIcon fontSize="small" />
+            <span>KMR Fresh Letter</span>
+          </div>
 
-      {/* Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="flex justify-center gap-4 flex-col md:flex-row items-center"
-      >
-        <input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="px-4 py-3 rounded-lg text-[#083f26] bg-white border border-[#dbe8d7] w-72 shadow-md focus:outline-none focus:ring-4 focus:ring-[#075c35]/20 focus:border-[#075c35] transition"
-        />
+          <h2 id="newsletter-title">
+            Get fresh deals <em>before</em> everyone else.
+          </h2>
 
-        <button
-          type="submit"
-          className="px-6 py-3 bg-[#075c35] text-white rounded-lg font-semibold shadow-lg hover:bg-[#083f26] hover:scale-105 transition duration-300"
-        >
-          Subscribe 🚀
-        </button>
-      </form>
+          <p>
+            One short email a week with new arrivals, flash sales and a little
+            something off your first order.
+          </p>
 
-      {/* Decorative */}
-      <div className="mt-6 text-sm text-[#718579]">
-        We promise not to spam you ✨
+          <ul className="nl-perks">
+            {perks.map(({ Icon, text }) => (
+              <li key={text}>
+                <Icon />
+                {text}
+              </li>
+            ))}
+          </ul>
+
+          {status === "success" ? (
+            <div className="nl-success" role="status">
+              <span className="nl-success-icon">
+                <CheckRoundedIcon />
+              </span>
+
+              <div>
+                <b>You're on the list!</b>
+                <small>
+                  We'll send fresh offers to <strong>{email}</strong>
+                </small>
+              </div>
+
+              <button type="button" onClick={reset}>
+                Use another email
+              </button>
+            </div>
+          ) : (
+            <>
+              <form
+                className={`nl-form ${status === "error" ? "has-error" : ""}`}
+                onSubmit={handleSubmit}
+                noValidate
+              >
+                <MailOutlineRoundedIcon />
+
+                <input
+                  type="email"
+                  value={email}
+                  onChange={handleChange}
+                  placeholder="Enter your email address"
+                  aria-label="Email address"
+                  aria-invalid={status === "error"}
+                  autoComplete="email"
+                />
+
+                <button type="submit" disabled={status === "loading"}>
+                  {status === "loading" ? (
+                    <>
+                      <span className="nl-spinner" />
+                      Joining
+                    </>
+                  ) : (
+                    <>
+                      Subscribe
+                      <SendRoundedIcon />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <small
+                className={`nl-note ${status === "error" ? "is-error" : ""}`}
+                role={status === "error" ? "alert" : undefined}
+              >
+                {status === "error"
+                  ? "Enter a valid email address, like name@example.com."
+                  : "No spam. Unsubscribe anytime."}
+              </small>
+            </>
+          )}
+        </div>
+
+        {/* ---------- Right: animated visual ---------- */}
+        <div className="nl-visual" aria-hidden="true">
+          <div className="nl-orb-wrap">
+            <span className="nl-ripple" />
+            <span className="nl-ripple r2" />
+            <span className="nl-ring" />
+
+            <div className="nl-orb">
+              <MailOutlineRoundedIcon />
+            </div>
+          </div>
+
+          <div className="nl-chip c1">
+            <LocalOfferOutlinedIcon />
+            10% off
+          </div>
+
+          <div className="nl-chip c2">
+            <NotificationsActiveOutlinedIcon />
+            Weekly deals
+          </div>
+
+          <div className="nl-chip c3">
+            <EnergySavingsLeafOutlinedIcon />
+            Always fresh
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
